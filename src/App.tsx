@@ -52,30 +52,8 @@ const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(defaultGameState);
 
   useEffect(() => {
-    initializeTelegramApp();
     loadGameState();
   }, []);
-
-  const initializeTelegramApp = async () => {
-    try {
-      // Initialize Telegram WebApp
-      if (window.Telegram?.WebApp) {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        
-        // Apply Telegram theme
-        document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
-        document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
-        
-        // Setup viewport
-        tg.setHeaderColor('bg_color');
-        tg.enableClosingConfirmation();
-      }
-    } catch (error) {
-      console.log('Ошибка инициализации Telegram WebApp:', error);
-    }
-  };
 
   const loadGameState = () => {
     try {
