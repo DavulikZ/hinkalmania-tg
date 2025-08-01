@@ -15,13 +15,13 @@ const AppContainer = styled.div`
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 `;
 
-// Get viewport dimensions
-const getViewportDimensions = () => {
-  return {
-    width: window.innerWidth,
-    height: window.innerHeight
-  };
-};
+// Get viewport dimensions (currently unused but may be needed later)
+// const getViewportDimensions = () => {
+//   return {
+//     width: window.innerWidth,
+//     height: window.innerHeight
+//   };
+// };
 
 export type GameState = {
   coins: number;
