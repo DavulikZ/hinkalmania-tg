@@ -4,6 +4,9 @@
   "outputDirectory": "build",
   "installCommand": "npm install --legacy-peer-deps",
   "public": true,
+  "github": {
+    "silent": true
+  },
   "rewrites": [
     {
       "source": "/(.*)",
@@ -44,6 +47,13 @@
   ],
   "env": {
     "REACT_APP_TELEGRAM_BOT_NAME": "hinkalmania_bot",
-    "REACT_APP_VERSION": "1.0.0"
+    "REACT_APP_VERSION": "2.0.0",
+    "REACT_APP_GAME_TITLE": "Хинкальмания",
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "app/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
   }
 }

@@ -2,6 +2,8 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import {GameState} from '../App';
+import { FOOD_TYPES, TRASH_TYPES, GAME_SETTINGS } from '../constants/game';
+import { getCurrentFallSpeed, shouldSpawnTrash, getRandomFoodType, getRandomTrashType, getFoodConfig, getTrashConfig } from '../utils/gameUtils';
 
 const Container = styled.div`
   width: 100vw;
@@ -43,7 +45,7 @@ const GameArea = styled.div`
   overflow: hidden;
 `;
 
-const FoodItem = styled(motion.div)<{ x: number; y: number }>`
+const FoodItem = styled(motion.div)<{ x: number; y: number; isTrash?: boolean }>`
   position: absolute;
   width: 60px;
   height: 60px;
@@ -54,6 +56,19 @@ const FoodItem = styled(motion.div)<{ x: number; y: number }>`
   top: ${props => props.y}px;
   cursor: pointer;
   z-index: 10;
+  filter: ${props => props.isTrash ? 'drop-shadow(0 0 8px rgba(255, 0, 0, 0.5))' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'};
+  font-size: 40px;
+  user-select: none;
+  
+  ${props => props.isTrash && `
+    animation: shake 0.3s infinite;
+    
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(1deg); }
+      75% { transform: rotate(-1deg); }
+    }
+  `}
 `;
 
 const FoodEmoji = styled.div`
@@ -146,16 +161,20 @@ const GameButton = styled.button`
   }
 `;
 
-const ScorePopup = styled(motion.div)<{ x: number; y: number }>`
+const ScorePopup = styled(motion.div)<{ x: number; y: number; score: number }>`
   position: absolute;
   left: ${props => props.x}px;
   top: ${props => props.y}px;
-  color: #FFD700;
+  color: ${props => props.score >= 0 ? '#FFD700' : '#FF4444'};
   font-weight: bold;
   font-size: 18px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   pointer-events: none;
   z-index: 30;
+  
+  &::before {
+    content: ${props => props.score >= 0 ? '"+' + props.score + '"' : '"' + props.score + '"'};
+  }
 `;
 
 interface GameScreenProps {
@@ -166,9 +185,11 @@ interface GameScreenProps {
 
 interface FoodItemType {
   id: string;
-  type: 'hinkali' | 'shaurma' | 'shashlik' | 'kebab';
+  type: 'hinkali' | 'shaurma' | 'shashlik' | 'kebab' | 'garbage' | 'rotten' | 'poison' | 'fly';
   x: number;
   y: number;
+  isTrash?: boolean;
+  fallSpeed?: number;
 }
 
 interface ScorePopupType {
@@ -178,12 +199,7 @@ interface ScorePopupType {
   y: number;
 }
 
-const FOOD_TYPES = {
-  hinkali: {emoji: '🥟', points: 10, coins: 2},
-  shaurma: {emoji: '🥙', points: 15, coins: 3},
-  shashlik: {emoji: '🍖', points: 20, coins: 4},
-  kebab: {emoji: '🥪', points: 25, coins: 5},
-};
+// FOOD_TYPES и TRASH_TYPES теперь импортируются из constants/game.ts
 
 const GameScreenWeb: React.FC<GameScreenProps> = ({
   gameState,
@@ -241,13 +257,17 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     }
   }, [isGameActive]);
 
-  // Animation loop for falling food
+  // Animation loop for falling food with variable speed
   useEffect(() => {
     const animateFood = () => {
+      const currentGameTime = (60 - gameTime) * 1000; // время игры в миллисекундах
+      const baseFallSpeed = getCurrentFallSpeed(currentGameTime);
+      const normalizedSpeed = 3000 / baseFallSpeed; // нормализуем для 60fps
+      
       setFoodItems(prevItems => 
         prevItems.map(item => ({
           ...item,
-          y: item.y + 2 // Fall speed
+          y: item.y + (item.fallSpeed || normalizedSpeed) // индивидуальная или базовая скорость
         })).filter(item => item.y < window.innerHeight)
       );
       
@@ -265,7 +285,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isGameActive]);
+  }, [isGameActive, gameTime]);
 
   const startGame = () => {
     setIsGameActive(true);
@@ -299,34 +319,72 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   const spawnFood = () => {
     if (!isGameActive) return;
 
-    const availableFoods = gameState.unlockedFoods;
-    const randomFood = availableFoods[Math.floor(Math.random() * availableFoods.length)] as keyof typeof FOOD_TYPES;
+    const currentGameTime = (60 - gameTime) * 1000;
+    const isSpawningTrash = shouldSpawnTrash(currentGameTime);
     
-    const newFood: FoodItemType = {
-      id: Date.now().toString(),
-      type: randomFood,
-      x: Math.random() * (window.innerWidth - 100),
-      y: -50,
-    };
+    let newItem: FoodItemType;
+    
+    if (isSpawningTrash) {
+      // Спавним мусор
+      const trashType = getRandomTrashType() as keyof typeof TRASH_TYPES;
+      const currentSpeed = getCurrentFallSpeed(currentGameTime);
+      const normalizedSpeed = 3000 / currentSpeed;
+      
+      newItem = {
+        id: Date.now().toString(),
+        type: trashType,
+        x: Math.random() * (window.innerWidth - 100),
+        y: -50,
+        isTrash: true,
+        fallSpeed: normalizedSpeed * 1.2, // мусор падает чуть быстрее
+      };
+    } else {
+      // Спавним еду
+      const availableFoods = gameState.unlockedFoods;
+      const randomFood = getRandomFoodType(availableFoods) as keyof typeof FOOD_TYPES;
+      const currentSpeed = getCurrentFallSpeed(currentGameTime);
+      const normalizedSpeed = 3000 / currentSpeed;
+      
+      newItem = {
+        id: Date.now().toString(),
+        type: randomFood,
+        x: Math.random() * (window.innerWidth - 100),
+        y: -50,
+        isTrash: false,
+        fallSpeed: normalizedSpeed,
+      };
+    }
 
-    setFoodItems(prev => [...prev, newFood]);
+    setFoodItems(prev => [...prev, newItem]);
   };
 
   const collectFood = (foodItem: FoodItemType) => {
-    const foodConfig = FOOD_TYPES[foodItem.type];
-    const newScore = score + foodConfig.points;
-    const newCoins = gameState.coins + foodConfig.coins;
+    let itemConfig, newScore, newCoins, hapticType: 'light' | 'medium' | 'heavy' = 'light';
+    
+    if (foodItem.isTrash) {
+      // Обработка мусора
+      itemConfig = getTrashConfig(foodItem.type);
+      newScore = Math.max(0, score + itemConfig.points); // очки не могут быть отрицательными
+      newCoins = Math.max(0, gameState.coins + itemConfig.coins); // монеты не могут быть отрицательными
+      hapticType = 'heavy'; // сильная вибрация для мусора
+    } else {
+      // Обработка еды
+      itemConfig = getFoodConfig(foodItem.type);
+      newScore = score + itemConfig.points;
+      newCoins = gameState.coins + itemConfig.coins;
+      hapticType = 'light';
+    }
     
     setScore(newScore);
     onUpdateGameState({coins: newCoins});
 
-    // Remove food item
+    // Remove item
     setFoodItems(prev => prev.filter(item => item.id !== foodItem.id));
 
-    // Show score popup
+    // Show score popup with appropriate color
     const popup: ScorePopupType = {
       id: `popup-${Date.now()}`,
-      score: foodConfig.points,
+      score: itemConfig.points,
       x: foodItem.x + 30,
       y: foodItem.y + 30,
     };
@@ -339,7 +397,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
 
     // Telegram haptic feedback
     if (window.Telegram?.WebApp?.HapticFeedback) {
-      window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+      window.Telegram.WebApp.HapticFeedback.impactOccurred(hapticType);
     }
   };
 
@@ -368,21 +426,25 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         onMouseMove={handlePointerMove}
         style={{ touchAction: 'none' }}>
         
-        {/* Падающая еда */}
+        {/* Падающая еда и мусор */}
         <AnimatePresence>
-          {foodItems.map(foodItem => (
-            <FoodItem
-              key={foodItem.id}
-              x={foodItem.x}
-              y={foodItem.y}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              whileHover={{ scale: 1.1 }}
-              onClick={() => collectFood(foodItem)}>
-              <FoodEmoji>{FOOD_TYPES[foodItem.type].emoji}</FoodEmoji>
-            </FoodItem>
-          ))}
+          {foodItems.map(foodItem => {
+            const itemConfig = foodItem.isTrash ? getTrashConfig(foodItem.type) : getFoodConfig(foodItem.type);
+            return (
+              <FoodItem
+                key={foodItem.id}
+                x={foodItem.x}
+                y={foodItem.y}
+                isTrash={foodItem.isTrash}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                whileHover={{ scale: 1.1 }}
+                onClick={() => collectFood(foodItem)}>
+                <FoodEmoji>{itemConfig.emoji}</FoodEmoji>
+              </FoodItem>
+            );
+          })}
         </AnimatePresence>
 
         {/* Score popups */}
@@ -392,11 +454,11 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
               key={popup.id}
               x={popup.x}
               y={popup.y}
+              score={popup.score}
               initial={{ opacity: 1, y: popup.y }}
               animate={{ opacity: 0, y: popup.y - 50 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1 }}>
-              +{popup.score}
             </ScorePopup>
           ))}
         </AnimatePresence>
