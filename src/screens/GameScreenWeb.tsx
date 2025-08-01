@@ -341,7 +341,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     
     if (isSpawningTrash) {
       // Спавним негативные блюда (не кавказская кухня)
-      const trashType = getRandomTrashType() as keyof typeof TRASH_TYPES;
+      const trashType = getRandomTrashType() as 'pasta' | 'sushi' | 'shawarma' | 'burger';
       const currentSpeed = getCurrentFallSpeed(currentGameTime);
       const normalizedSpeed = 3000 / currentSpeed;
       
@@ -356,7 +356,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     } else {
       // Спавним кавказскую еду
       const availableFoods = gameState.unlockedFoods;
-      const randomFood = getRandomFoodType(availableFoods) as keyof typeof FOOD_TYPES;
+      const randomFood = getRandomFoodType(availableFoods) as 'hinkali' | 'harcho' | 'adjarski' | 'megruli';
       const currentSpeed = getCurrentFallSpeed(currentGameTime);
       const normalizedSpeed = 3000 / currentSpeed;
       
