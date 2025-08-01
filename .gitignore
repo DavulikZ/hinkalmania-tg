@@ -153,6 +153,9 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# Yarn lock file (use only one package manager)
+yarn.lock
+
 # dotenv environment variables file
 .env
 .env.test
