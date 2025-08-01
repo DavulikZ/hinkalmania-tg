@@ -213,6 +213,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   const [gameTime, setGameTime] = useState(60);
   const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth / 2 - 25, y: window.innerHeight - 200 });
   const [platePosition, setPlatePosition] = useState({ x: window.innerWidth / 2 - 50, y: window.innerHeight - 150 });
+  const [canSpawnFood, setCanSpawnFood] = useState(false); // задержка спавна еды до 20 секунды
   
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
@@ -484,7 +485,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
           y={playerPosition.y}
           animate={{ x: playerPosition.x, y: playerPosition.y }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}>
-          <PlayerEmoji>🧑🏽‍🦱</PlayerEmoji>
+          <PlayerEmoji>🚶🏽‍♂️</PlayerEmoji>
         </Player>
 
         {/* Тарелка */}

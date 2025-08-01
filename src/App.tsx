@@ -32,6 +32,7 @@ export type GameState = {
   unlockedFoods: string[];
   soundEnabled: boolean;
   vibrationEnabled: boolean;
+  lives: number; // система жизней
 };
 
 const defaultGameState: GameState = {
@@ -43,6 +44,7 @@ const defaultGameState: GameState = {
   unlockedFoods: ['hinkali', 'harcho'], // начинаем с двух блюд
   soundEnabled: true,
   vibrationEnabled: true,
+  lives: 3, // 3 сердца
 };
 
 export type Screen = 'menu' | 'game' | 'shop' | 'settings';
