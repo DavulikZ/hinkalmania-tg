@@ -35,12 +35,12 @@ export type GameState = {
 };
 
 const defaultGameState: GameState = {
-  coins: 100,
+  coins: 150, // больше начальных монет для новых блюд
   score: 0,
   highScore: 0,
   unlockedSkins: ['default'],
   currentSkin: 'default',
-  unlockedFoods: ['hinkali'],
+  unlockedFoods: ['hinkali', 'harcho'], // начинаем с двух блюд
   soundEnabled: true,
   vibrationEnabled: true,
 };
