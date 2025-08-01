@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
-import { initData, themeParams, viewport, mainButton, hapticFeedback } from '@telegram-apps/sdk';
+// Telegram WebApp will be available via window.Telegram.WebApp
 import GameScreen from './screens/GameScreenWeb';
 import MenuScreen from './screens/MenuScreen';
 import ShopScreen from './screens/ShopScreenWeb';
