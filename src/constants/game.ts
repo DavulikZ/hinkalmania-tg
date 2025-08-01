@@ -1,10 +1,10 @@
 import {FoodConfig} from '../types';
 
 export const FOOD_TYPES: Record<string, FoodConfig> = {
-  hinkali: {emoji: '🥟', points: 10, coins: 2},
-  shaurma: {emoji: '🥙', points: 15, coins: 3},
-  shashlik: {emoji: '🍖', points: 20, coins: 4},
-  kebab: {emoji: '🥪', points: 25, coins: 5},
+  hinkali: {emoji: '🦪', points: 15, coins: 3}, // хинкали - как раковина (более похоже)
+  harcho: {emoji: '🍲', points: 20, coins: 4}, // харчо - суп
+  adjarski: {emoji: '🥧', points: 25, coins: 5}, // хачапури по-аджарски (один кусок)
+  megruli: {emoji: '🍞🍞', points: 35, coins: 7}, // хачапури по-мегрельски (два куска)
 };
 
 export const SKIN_CONFIGS = {
