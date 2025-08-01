@@ -1,5 +1,5 @@
 {
-  "name": "hinkalmania-tg",
+  "name": "hinkalimaniia-tg",
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "installCommand": "npm install --legacy-peer-deps",
