@@ -1,15 +1,38 @@
 import React from 'react';
-import {TouchableOpacity, Text, StyleSheet} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import styled from 'styled-components';
+import { motion } from 'framer-motion';
 
 interface GradientButtonProps {
   title: string;
   onPress: () => void;
   colors?: string[];
-  style?: any;
-  textStyle?: any;
+  style?: React.CSSProperties;
+  textStyle?: React.CSSProperties;
   disabled?: boolean;
 }
+
+const Button = styled(motion.button)<{
+  colors: string[];
+  disabled: boolean;
+}>`
+  background: linear-gradient(135deg, ${props => props.colors[0]}, ${props => props.colors[1]});
+  border: none;
+  border-radius: 15px;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #FFFFFF;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.disabled ? 0.5 : 1};
+  user-select: none;
+  outline: none;
+  
+  &:active {
+    transform: ${props => props.disabled ? 'none' : 'scale(0.98)'};
+  }
+`;
 
 const GradientButton: React.FC<GradientButtonProps> = ({
   title,
@@ -20,42 +43,17 @@ const GradientButton: React.FC<GradientButtonProps> = ({
   disabled = false,
 }) => {
   return (
-    <TouchableOpacity
-      style={[styles.button, style, disabled && styles.disabled]}
-      onPress={onPress}
-      disabled={disabled}>
-      <LinearGradient colors={colors} style={styles.gradient}>
-        <Text style={[styles.text, textStyle]}>{title}</Text>
-      </LinearGradient>
-    </TouchableOpacity>
+    <Button
+      colors={colors}
+      disabled={disabled}
+      onClick={disabled ? undefined : onPress}
+      style={style}
+      whileHover={disabled ? {} : { scale: 1.05 }}
+      whileTap={disabled ? {} : { scale: 0.95 }}
+    >
+      <span style={textStyle}>{title}</span>
+    </Button>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    borderRadius: 15,
-    overflow: 'hidden',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  gradient: {
-    paddingVertical: 15,
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: {width: 1, height: 1},
-    textShadowRadius: 2,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-});
 
 export default GradientButton; 

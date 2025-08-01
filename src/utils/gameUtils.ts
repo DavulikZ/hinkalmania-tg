@@ -1,9 +1,15 @@
-import {Dimensions} from 'react-native';
 import {FOOD_TYPES, GAME_SETTINGS} from '../constants/game';
 
-const {width, height} = Dimensions.get('window');
+// Для веба используем размеры окна браузера
+const getWindowDimensions = () => {
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+};
 
 export const generateRandomPosition = () => {
+  const {width} = getWindowDimensions();
   return {
     x: Math.random() * (width - 100),
     y: -50,

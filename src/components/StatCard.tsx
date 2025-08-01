@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import styled from 'styled-components';
 
 interface StatCardProps {
   label: string;
@@ -8,6 +8,44 @@ interface StatCardProps {
   color?: string;
 }
 
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  margin: 0 5px;
+  min-width: 80px;
+`;
+
+const Label = styled.div`
+  font-size: 12px;
+  color: #FFFFFF;
+  opacity: 0.8;
+  margin-bottom: 5px;
+  text-align: center;
+`;
+
+const ValueContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Icon = styled.span`
+  font-size: 16px;
+  margin-right: 5px;
+`;
+
+const Value = styled.div<{ color: string }>`
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  color: ${props => props.color};
+`;
+
 const StatCard: React.FC<StatCardProps> = ({
   label,
   value,
@@ -15,46 +53,14 @@ const StatCard: React.FC<StatCardProps> = ({
   color = '#FFFFFF',
 }) => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.valueContainer}>
-        {icon && <Text style={styles.icon}>{icon}</Text>}
-        <Text style={[styles.value, {color}]}>{value}</Text>
-      </View>
-    </View>
+    <Container>
+      <Label>{label}</Label>
+      <ValueContainer>
+        {icon && <Icon>{icon}</Icon>}
+        <Value color={color}>{value}</Value>
+      </ValueContainer>
+    </Container>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 10,
-    padding: 10,
-    marginHorizontal: 5,
-    minWidth: 80,
-  },
-  label: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    opacity: 0.8,
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  valueContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 16,
-    marginRight: 5,
-  },
-  value: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
 
 export default StatCard; 

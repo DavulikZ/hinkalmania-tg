@@ -1,5 +1,4 @@
 import {useState, useEffect} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {GameState} from '../App';
 
 const STORAGE_KEY = 'hinkalmania_game_state';
@@ -23,9 +22,9 @@ export const useGameState = () => {
     loadGameState();
   }, []);
 
-  const loadGameState = async () => {
+  const loadGameState = () => {
     try {
-      const savedState = await AsyncStorage.getItem(STORAGE_KEY);
+      const savedState = localStorage.getItem(STORAGE_KEY);
       if (savedState) {
         const parsedState = JSON.parse(savedState);
         setGameState({...defaultGameState, ...parsedState});
@@ -37,9 +36,9 @@ export const useGameState = () => {
     }
   };
 
-  const saveGameState = async (newState: GameState) => {
+  const saveGameState = (newState: GameState) => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       setGameState(newState);
     } catch (error) {
       console.log('Ошибка сохранения состояния игры:', error);
