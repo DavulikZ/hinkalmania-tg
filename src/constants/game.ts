@@ -7,6 +7,14 @@ export const FOOD_TYPES: Record<string, FoodConfig> = {
   megruli: {emoji: '🍞🍞', points: 35, coins: 7}, // хачапури по-мегрельски (два куска)
 };
 
+// Негативные предметы (не кавказская кухня)
+export const TRASH_TYPES: Record<string, FoodConfig> = {
+  pasta: {emoji: '🍝', points: -15, coins: -2}, // паста - не кавказская еда
+  sushi: {emoji: '🍣', points: -20, coins: -3}, // суши - не кавказская еда  
+  shawarma: {emoji: '🌯', points: -10, coins: -1}, // шаурма - не традиционная кавказская
+  burger: {emoji: '🍔', points: -25, coins: -4}, // бургер - фастфуд
+};
+
 export const SKIN_CONFIGS = {
   default: {
     emoji: '👨‍🦱',
