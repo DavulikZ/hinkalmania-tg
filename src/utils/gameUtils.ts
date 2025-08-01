@@ -1,4 +1,4 @@
-import {FOOD_TYPES, GAME_SETTINGS} from '../constants/game';
+import {FOOD_TYPES, TRASH_TYPES, GAME_SETTINGS} from '../constants/game';
 
 // Для веба используем размеры окна браузера
 const getWindowDimensions = () => {
