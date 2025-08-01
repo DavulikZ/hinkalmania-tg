@@ -63,4 +63,47 @@ export const calculateNewCoins = (
 
 export const isHighScore = (currentScore: number, highScore: number): boolean => {
   return currentScore > highScore;
+};
+
+// Определяет, должен ли появиться мусор на основе времени игры
+export const shouldSpawnTrash = (gameTime: number): boolean => {
+  const timeInSeconds = gameTime / 1000;
+  const speedUps = Math.floor(timeInSeconds / (GAME_SETTINGS.SPEED_INCREASE_INTERVAL / 1000));
+  
+  const currentTrashChance = Math.min(
+    GAME_SETTINGS.TRASH_SPAWN_CHANCE + (speedUps * GAME_SETTINGS.TRASH_INCREASE_RATE),
+    GAME_SETTINGS.MAX_TRASH_CHANCE
+  );
+  
+  return Math.random() < currentTrashChance;
+};
+
+// Вычисляет текущую скорость падения объектов (улучшенная)
+export const getCurrentFallSpeed = (gameTime: number): number => {
+  const timeInSeconds = gameTime / 1000;
+  const speedUps = Math.floor(timeInSeconds / (GAME_SETTINGS.SPEED_INCREASE_INTERVAL / 1000));
+  
+  const currentSpeed = GAME_SETTINGS.FOOD_FALL_DURATION * Math.pow(GAME_SETTINGS.SPEED_MULTIPLIER, speedUps);
+  
+  return Math.max(currentSpeed, GAME_SETTINGS.MIN_FALL_DURATION);
+};
+
+// Вычисляет текущий интервал спавна (больше еды!)
+export const getCurrentSpawnInterval = (gameTime: number): number => {
+  const timeInSeconds = gameTime / 1000;
+  const speedUps = Math.floor(timeInSeconds / (GAME_SETTINGS.SPEED_INCREASE_INTERVAL / 1000));
+  
+  const currentInterval = GAME_SETTINGS.FOOD_SPAWN_INTERVAL * Math.pow(GAME_SETTINGS.SPAWN_SPEED_MULTIPLIER, speedUps);
+  
+  return Math.max(currentInterval, GAME_SETTINGS.MIN_SPAWN_INTERVAL);
+};
+
+export const getRandomTrashType = (): string => {
+  const trashTypes = Object.keys(TRASH_TYPES);
+  const randomIndex = Math.floor(Math.random() * trashTypes.length);
+  return trashTypes[randomIndex];
+};
+
+export const getTrashConfig = (type: string) => {
+  return TRASH_TYPES[type] || TRASH_TYPES.pasta;
 }; 
