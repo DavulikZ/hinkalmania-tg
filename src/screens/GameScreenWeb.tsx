@@ -274,7 +274,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       }, 1000);
 
       // Динамический спавн еды с увеличивающейся частотой
-      let foodSpawnerInterval: number;
+      let foodSpawnerInterval: ReturnType<typeof setInterval>;
       
       const updateSpawnRate = () => {
         if (foodSpawnerInterval) clearInterval(foodSpawnerInterval);
@@ -403,7 +403,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       };
     }
 
-    setFoodItems(prev => [...prev, newItem]);
+    setFoodItems((prev: FoodItemType[]) => [...prev, newItem]);
   };
 
   const collectFood = (foodItem: FoodItemType) => {
@@ -427,7 +427,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     onUpdateGameState({coins: newCoins});
 
     // Remove item
-    setFoodItems(prev => prev.filter(item => item.id !== foodItem.id));
+    setFoodItems((prev: FoodItemType[]) => prev.filter((item: FoodItemType) => item.id !== foodItem.id));
 
     // Show score popup with appropriate color
     const popup: ScorePopupType = {
@@ -436,11 +436,11 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       x: foodItem.x + 30,
       y: foodItem.y + 30,
     };
-    setScorePopups(prev => [...prev, popup]);
+    setScorePopups((prev: ScorePopupType[]) => [...prev, popup]);
 
     // Remove popup after animation
     setTimeout(() => {
-      setScorePopups(prev => prev.filter(p => p.id !== popup.id));
+      setScorePopups((prev: ScorePopupType[]) => prev.filter((p: ScorePopupType) => p.id !== popup.id));
     }, 1000);
 
     // Telegram haptic feedback
