@@ -2,8 +2,8 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import {GameState} from '../App';
-import { FOOD_TYPES, TRASH_TYPES, GAME_SETTINGS, SKIN_CONFIGS } from '../constants/game';
-import { getCurrentFallSpeed, getCurrentSpawnInterval, shouldSpawnTrash, getRandomFoodType, getRandomTrashType, getFoodConfig, getTrashConfig } from '../utils/gameUtils';
+import { SKIN_CONFIGS } from '../constants/game';
+import { getFoodConfig, getTrashConfig } from '../utils/gameUtils';
 
 const Container = styled.div`
   width: 100vw;
@@ -273,51 +273,27 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         });
       }, 1000);
 
-      // Динамический спавн еды с увеличивающейся частотой
-      let foodSpawnerInterval: ReturnType<typeof setInterval>;
-      
-      const updateSpawnRate = () => {
-        if (foodSpawnerInterval) clearInterval(foodSpawnerInterval);
-        
-        const currentGameTime = (60 - gameTime) * 1000;
-        const currentSpawnInterval = getCurrentSpawnInterval(currentGameTime);
-        
-        foodSpawnerInterval = setInterval(() => {
-          spawnFood();
-        }, currentSpawnInterval);
-      };
-
-      // Сразу начинаем спавнить еду
-      updateSpawnRate();
-      
-      // Обновляем интервал спавна каждые 2 секунды
-      const spawnRateUpdater = setInterval(updateSpawnRate, 2000);
+      // Простой спавн еды каждые 1.5 секунды
+      const foodSpawnerInterval = setInterval(() => {
+        spawnFood();
+      }, 1500);
 
       return () => {
         clearInterval(timer);
         clearInterval(foodSpawnerInterval);
-        clearInterval(spawnRateUpdater);
       };
     }
-  }, [isGameActive, gameTime]);
+  }, [isGameActive]);
 
-  // Animation loop for falling food with variable speed - оптимизированная версия
+  // Простая анимация падающей еды
   useEffect(() => {
-    let lastTime = 0;
-    const animateFood = (currentTime: number) => {
+    const animateFood = () => {
       if (!isGameActive) return;
-      
-      const deltaTime = currentTime - lastTime;
-      lastTime = currentTime;
-      
-      const currentGameTime = (60 - gameTime) * 1000;
-      const baseFallSpeed = getCurrentFallSpeed(currentGameTime);
-      const normalizedSpeed = (baseFallSpeed / 1000) * deltaTime; // скорость в пикселях за кадр
       
       setFoodItems((prevItems: FoodItemType[]) => 
         prevItems.map((item: FoodItemType) => ({
           ...item,
-          y: item.y + (item.fallSpeed || normalizedSpeed * 60) // индивидуальная или базовая скорость
+          y: item.y + 3 // простая скорость падения
         })).filter((item: FoodItemType) => item.y < window.innerHeight)
       );
       
@@ -333,7 +309,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isGameActive, gameTime]);
+  }, [isGameActive]);
 
   const startGame = () => {
     setIsGameActive(true);
@@ -367,16 +343,15 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   const spawnFood = () => {
     if (!isGameActive) return;
 
-    const currentGameTime = (60 - gameTime) * 1000;
-    const isSpawningTrash = shouldSpawnTrash(currentGameTime);
+    // Простой спавн еды
+    const isSpawningTrash = Math.random() < 0.2; // 20% шанс мусора
     
     let newItem: FoodItemType;
     
     if (isSpawningTrash) {
-      // Спавним негативные блюда (не кавказская кухня)
-      const trashType = getRandomTrashType() as 'pasta' | 'sushi' | 'shawarma' | 'burger';
-      const currentSpeed = getCurrentFallSpeed(currentGameTime);
-      const normalizedSpeed = 3000 / currentSpeed;
+      // Спавним негативные блюда
+      const trashTypes = ['pasta', 'sushi', 'shawarma', 'burger'] as const;
+      const trashType = trashTypes[Math.floor(Math.random() * trashTypes.length)];
       
       newItem = {
         id: Date.now().toString(),
@@ -384,14 +359,11 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         x: Math.random() * (window.innerWidth - 100),
         y: -50,
         isTrash: true,
-        fallSpeed: normalizedSpeed * 1.2, // негативная еда падает чуть быстрее
       };
     } else {
       // Спавним кавказскую еду
       const availableFoods = gameState.unlockedFoods;
-      const randomFood = getRandomFoodType(availableFoods) as 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'lobio' | 'satsivi' | 'chakapuli';
-      const currentSpeed = getCurrentFallSpeed(currentGameTime);
-      const normalizedSpeed = 3000 / currentSpeed;
+      const randomFood = availableFoods[Math.floor(Math.random() * availableFoods.length)] as 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'lobio' | 'satsivi' | 'chakapuli';
       
       newItem = {
         id: Date.now().toString(),
@@ -399,7 +371,6 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         x: Math.random() * (window.innerWidth - 100),
         y: -50,
         isTrash: false,
-        fallSpeed: normalizedSpeed,
       };
     }
 
