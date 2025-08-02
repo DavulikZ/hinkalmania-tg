@@ -4,14 +4,15 @@ import {GameState} from '../App';
 const STORAGE_KEY = 'hinkalmania_game_state';
 
 const defaultGameState: GameState = {
-  coins: 100,
+  coins: 200, // больше начальных монет для новых дорогих товаров
   score: 0,
   highScore: 0,
   unlockedSkins: ['default'],
   currentSkin: 'default',
-  unlockedFoods: ['hinkali'],
+  unlockedFoods: ['hinkali', 'harcho'], // начинаем с двух базовых блюд
   soundEnabled: true,
   vibrationEnabled: true,
+  lives: 3, // добавляем систему жизней
 };
 
 export const useGameState = () => {

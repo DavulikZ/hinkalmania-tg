@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import {GameState} from '../App';
-import { FOOD_TYPES, TRASH_TYPES, GAME_SETTINGS } from '../constants/game';
+import { FOOD_TYPES, TRASH_TYPES, GAME_SETTINGS, SKIN_CONFIGS } from '../constants/game';
 import { getCurrentFallSpeed, getCurrentSpawnInterval, shouldSpawnTrash, getRandomFoodType, getRandomTrashType, getFoodConfig, getTrashConfig } from '../utils/gameUtils';
 
 const Container = styled.div`
@@ -185,7 +185,7 @@ interface GameScreenProps {
 
 interface FoodItemType {
   id: string;
-  type: 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'pasta' | 'sushi' | 'shawarma' | 'burger';
+  type: 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'lobio' | 'satsivi' | 'chakapuli' | 'pasta' | 'sushi' | 'shawarma' | 'burger';
   x: number;
   y: number;
   isTrash?: boolean;
@@ -213,7 +213,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   const [gameTime, setGameTime] = useState(60);
   const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth / 2 - 25, y: window.innerHeight - 200 });
   const [platePosition, setPlatePosition] = useState({ x: window.innerWidth / 2 - 50, y: window.innerHeight - 150 });
-  const [canSpawnFood, setCanSpawnFood] = useState(false); // задержка спавна еды до 20 секунды
+
   
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
@@ -357,7 +357,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     } else {
       // Спавним кавказскую еду
       const availableFoods = gameState.unlockedFoods;
-      const randomFood = getRandomFoodType(availableFoods) as 'hinkali' | 'harcho' | 'adjarski' | 'megruli';
+      const randomFood = getRandomFoodType(availableFoods) as 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'lobio' | 'satsivi' | 'chakapuli';
       const currentSpeed = getCurrentFallSpeed(currentGameTime);
       const normalizedSpeed = 3000 / currentSpeed;
       
@@ -485,7 +485,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
           y={playerPosition.y}
           animate={{ x: playerPosition.x, y: playerPosition.y }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}>
-          <PlayerEmoji>🚶🏽‍♂️</PlayerEmoji>
+          <PlayerEmoji>{SKIN_CONFIGS[gameState.currentSkin]?.emoji || '🚶🏽‍♂️'}</PlayerEmoji>
         </Player>
 
         {/* Тарелка */}

@@ -148,7 +148,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
     <Container>
       {/* Заголовок игры */}
       <Header>
-        <Title>ХИНКАЛЬМАНИЯ</Title>
+        <Title>ХИНКАЛИМАНИЯ</Title>
         <Subtitle>Собирай кавказские блюда!</Subtitle>
       </Header>
 

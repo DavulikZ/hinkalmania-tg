@@ -1,10 +1,8 @@
 export interface FoodItem {
   id: string;
-  type: 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'pasta' | 'sushi' | 'shawarma' | 'burger';
+  type: 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'lobio' | 'satsivi' | 'chakapuli' | 'pasta' | 'sushi' | 'shawarma' | 'burger';
   x: number;
   y: number;
-  animatedValue: any; // Animated.Value или для веба framer-motion value
-  scaleValue: any; // Animated.Value или для веба framer-motion value
   isTrash?: boolean; // флаг для определения мусора
   fallSpeed?: number; // индивидуальная скорость падения
 }
