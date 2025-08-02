@@ -272,6 +272,89 @@ const LevelUpEffect = styled(motion.div)`
   text-align: center;
 `;
 
+const GameOverOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+`;
+
+const GameOverContent = styled.div`
+  background: linear-gradient(135deg, #FF4444, #CC0000);
+  border-radius: 25px;
+  padding: 40px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  max-width: 90vw;
+  width: 400px;
+`;
+
+const GameOverTitle = styled.h1`
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0 0 20px 0;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+  animation: pulse 2s infinite;
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+`;
+
+const GameOverStats = styled.div`
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const GameOverStat = styled.div`
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+`;
+
+const GameOverButtons = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+  justify-content: center;
+`;
+
+const GameOverButton = styled.button`
+  background: linear-gradient(135deg, #4ECDC4, #6EE7DF);
+  border: none;
+  border-radius: 15px;
+  padding: 15px 25px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1.02);
+  }
+`;
+
 interface GameScreenProps {
   gameState: GameState;
   onUpdateGameState: (updates: Partial<GameState>) => void;
@@ -335,6 +418,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   const [currentCoins, setCurrentCoins] = useState(gameState.coins);
   const [combo, setCombo] = useState(0);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showGameOver, setShowGameOver] = useState(false);
   const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth / 2 - 30, y: window.innerHeight - 180 });
   const [platePosition, setPlatePosition] = useState({ x: window.innerWidth / 2 - 50, y: window.innerHeight - 120 });
 
@@ -351,6 +435,8 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     setCurrentCoins(gameState.coins);
     setFoodItems([]);
     setScorePopups([]);
+    setShowGameOver(false);
+    setCombo(0);
     
     // Telegram haptic feedback
     if (window.Telegram?.WebApp?.HapticFeedback) {
@@ -647,6 +733,10 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
       }
       
+      // Показываем экран проигрыша
+      setShowGameOver(true);
+      setIsGameActive(false);
+      
       // Обновляем статистику игры
       onUpdateGameState({
         totalGamesPlayed: gameState.totalGamesPlayed + 1,
@@ -654,8 +744,6 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         highScore: Math.max(gameState.highScore, score)
       });
       
-      // Возвращаемся в меню
-      onBackToMenu();
       return;
     }
     
@@ -874,6 +962,34 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
             <br />
             <span style={{ fontSize: '24px' }}>Уровень {gameState.level + 1}</span>
           </LevelUpEffect>
+        )}
+      </AnimatePresence>
+
+      {/* Экран проигрыша */}
+      <AnimatePresence>
+        {showGameOver && (
+          <GameOverOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}>
+            <GameOverContent>
+              <GameOverTitle>💀 ВЫ ПОТЕРЯЛИ ЖИЗНИ! 💀</GameOverTitle>
+              <GameOverStats>
+                <GameOverStat>Очки: {score}</GameOverStat>
+                <GameOverStat>Комбо: {combo}</GameOverStat>
+                <GameOverStat>Время: {gameTime}s</GameOverStat>
+              </GameOverStats>
+              <GameOverButtons>
+                <GameOverButton onClick={startGame}>
+                  ИГРАТЬ СНОВА
+                </GameOverButton>
+                <GameOverButton onClick={onBackToMenu}>
+                  В МЕНЮ
+                </GameOverButton>
+              </GameOverButtons>
+            </GameOverContent>
+          </GameOverOverlay>
         )}
       </AnimatePresence>
     </Container>
