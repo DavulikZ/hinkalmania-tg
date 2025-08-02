@@ -566,6 +566,8 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
 
   const collectFood = (foodItem: FoodItemType) => {
     let itemConfig, newScore, newCoins, hapticType: 'light' | 'medium' | 'heavy' = 'light';
+    let newLives = lives;
+    let bonusText = '';
     
     if (foodItem.isTrash) {
       // Обработка негативных блюд (не кавказская кухня)
@@ -578,32 +580,16 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       createParticles(foodItem.x + 30, foodItem.y + 30, '#FF4444');
       
       // Уменьшаем жизни при сборе мусора
-      const newLives = Math.max(0, lives - 1);
+      newLives = Math.max(0, lives - 1);
       setLives(newLives);
       
       // Сбрасываем комбо при сборе мусора
       setCombo(0);
       
-      // Если жизни закончились, завершаем игру
-      if (newLives <= 0) {
-        // Telegram haptic feedback
-        if (window.Telegram?.WebApp?.HapticFeedback) {
-          window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-        }
-        
-        // Обновляем статистику игры
-        onUpdateGameState({
-          totalGamesPlayed: gameState.totalGamesPlayed + 1,
-          totalScore: gameState.totalScore + score,
-          highScore: Math.max(gameState.highScore, score)
-        });
-        
-        // Возвращаемся в меню
-        onBackToMenu();
-        return;
-      }
+      bonusText = '💔 -1 ЖИЗНЬ';
+      
     } else {
-      // Обработка кавказской еды
+      // Обработка кавказской еды - даем бонусы!
       itemConfig = getFoodConfig(foodItem.type);
       newScore = score + itemConfig.points;
       newCoins = currentCoins + itemConfig.coins;
@@ -616,10 +602,61 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       const newCombo = combo + 1;
       setCombo(newCombo);
       
+      // Бонусы за хорошую еду
+      let bonusCoins = 0;
+      let bonusLives = 0;
+      
+      // Каждое 3-е кавказское блюдо дает бонус
+      if (newCombo % 3 === 0) {
+        bonusCoins = 10;
+        bonusText = '🎉 +10 МОНЕТ!';
+      }
+      
+      // Каждое 5-е кавказское блюдо восстанавливает жизнь
+      if (newCombo % 5 === 0 && lives < gameState.lives) {
+        bonusLives = 1;
+        bonusText = '❤️ +1 ЖИЗНЬ!';
+      }
+      
+      // Каждое 10-е кавказское блюдо дает двойные очки
+      if (newCombo % 10 === 0) {
+        newScore += itemConfig.points; // двойные очки
+        bonusText = '⭐ ДВОЙНЫЕ ОЧКИ!';
+      }
+      
+      // Применяем бонусы
+      newCoins += bonusCoins;
+      newLives = Math.min(gameState.lives, newLives + bonusLives);
+      setLives(newLives);
+      
       // Показываем комбо текст
       if (newCombo >= 3) {
         createCombo(foodItem.x + 30, foodItem.y - 20, `COMBO x${newCombo}!`);
       }
+      
+      // Показываем бонус текст
+      if (bonusText) {
+        createCombo(foodItem.x + 30, foodItem.y - 40, bonusText);
+      }
+    }
+    
+    // Если жизни закончились, завершаем игру
+    if (newLives <= 0) {
+      // Telegram haptic feedback
+      if (window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+      }
+      
+      // Обновляем статистику игры
+      onUpdateGameState({
+        totalGamesPlayed: gameState.totalGamesPlayed + 1,
+        totalScore: gameState.totalScore + score,
+        highScore: Math.max(gameState.highScore, score)
+      });
+      
+      // Возвращаемся в меню
+      onBackToMenu();
+      return;
     }
     
     setScore(newScore);
@@ -671,7 +708,17 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         </InfoItem>
         <InfoItem>
           <InfoLabel>Жизни</InfoLabel>
-          <InfoValue>❤️ {lives}</InfoValue>
+          <InfoValue>
+            {Array.from({ length: gameState.lives }, (_, i) => (
+              <span key={i} style={{ 
+                color: i < lives ? '#FF4444' : '#666666',
+                fontSize: '20px',
+                marginRight: '2px'
+              }}>
+                ❤️
+              </span>
+            ))}
+          </InfoValue>
         </InfoItem>
         {combo >= 3 && (
           <InfoItem>
