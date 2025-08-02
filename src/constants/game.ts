@@ -64,7 +64,7 @@ export const SKIN_CONFIGS = {
 };
 
 export const GAME_SETTINGS = {
-  GAME_DURATION: 120, // секунды
+  GAME_DURATION: 60, // секунды
   FOOD_SPAWN_INTERVAL: 2000, // миллисекунды (начальный интервал)
   FOOD_FALL_DURATION: 3000, // миллисекунды (начальная скорость)
   COLLECTION_ANIMATION_DURATION: 400, // миллисекунды
