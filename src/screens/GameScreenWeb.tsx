@@ -12,15 +12,21 @@ const Container = styled.div`
   overflow: hidden;
   position: relative;
   user-select: none;
+  background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #FECFEF 100%);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
 `;
 
 const TopPanel = styled.div`
   display: flex;
   justify-content: space-around;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   padding: 15px;
   margin-top: 20px;
   backdrop-filter: blur(10px);
+  border-radius: 20px;
+  margin: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.5);
 `;
 
 const InfoItem = styled.div`
@@ -34,9 +40,11 @@ const InfoLabel = styled.div`
 `;
 
 const InfoValue = styled.div`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 `;
 
 const GameArea = styled.div`
@@ -73,31 +81,45 @@ const FoodItem = styled(motion.div)<{ x: number; y: number; isTrash?: boolean }>
 `;
 
 const FoodEmoji = styled.div`
-  font-size: 30px;
-  background: rgba(255, 255, 255, 0.9);
+  font-size: 35px;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  animation: bounce 2s infinite;
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-5px); }
+    60% { transform: translateY(-3px); }
+  }
 `;
 
 const Player = styled(motion.div)<PositionProps>`
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 50%;
   transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
   z-index: 25;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  border: 4px solid rgba(255, 255, 255, 0.9);
   will-change: transform;
+  animation: float 3s ease-in-out infinite;
+  
+  @keyframes float {
+    0%, 100% { transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px) translateY(0px); }
+    50% { transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px) translateY(-3px); }
+  }
 `;
 
 const PlayerImage = styled.img`
@@ -109,18 +131,32 @@ const PlayerImage = styled.img`
 
 const Plate = styled(motion.div)<PositionProps>`
   position: absolute;
-  width: 100px;
-  height: 60px;
+  width: 110px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
   transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px);
   z-index: 15;
   will-change: transform;
+  animation: wobble 2s ease-in-out infinite;
+  
+  @keyframes wobble {
+    0%, 100% { transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px) rotate(0deg); }
+    25% { transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px) rotate(1deg); }
+    75% { transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px) rotate(-1deg); }
+  }
 `;
 
 const PlateEmoji = styled.div`
-  font-size: 40px;
+  font-size: 45px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: spin 4s linear infinite;
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 `;
 
 const Controls = styled.div`
@@ -148,17 +184,25 @@ const GameButton = styled.button`
   flex: 1;
   background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
   border: none;
-  border-radius: 15px;
-  padding: 15px;
+  border-radius: 20px;
+  padding: 18px;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1.02);
   }
 
   &.menu {
@@ -533,9 +577,23 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       // Сбрасываем комбо при сборе мусора
       setCombo(0);
       
-      // Если жизни закончились, заканчиваем игру
+      // Если жизни закончились, начинаем игру заново
       if (newLives <= 0) {
-        endGame();
+        // Сбрасываем состояние игры
+        setScore(0);
+        setGameTime(60);
+        setLives(gameState.lives);
+        setCurrentCoins(gameState.coins);
+        setFoodItems([]);
+        setScorePopups([]);
+        setCombo(0);
+        setParticles([]);
+        setCombos([]);
+        
+        // Telegram haptic feedback
+        if (window.Telegram?.WebApp?.HapticFeedback) {
+          window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+        }
         return;
       }
     } else {

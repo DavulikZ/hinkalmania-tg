@@ -12,6 +12,8 @@ const Container = styled.div`
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #FECFEF 100%);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
 `;
 
 const Header = styled.div`
@@ -21,11 +23,13 @@ const Header = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 32px;
+  font-size: 36px;
   font-weight: bold;
   color: white;
   margin-bottom: 10px;
   margin: 0;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 `;
 
 const Subtitle = styled.div`
@@ -41,22 +45,39 @@ const ProfileSection = styled.div`
   justify-content: center;
   gap: 15px;
   margin-bottom: 20px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
   backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
 `;
 
 const ProfileAvatar = styled.div`
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  animation: bounce 2s infinite;
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-5px); }
+    60% { transform: translateY(-3px); }
+  }
 `;
 
 const ProfileInfo = styled.div`
@@ -82,17 +103,27 @@ const StatsGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  padding: 15px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  padding: 18px;
   text-align: center;
   backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
 `;
 
 const StatValue = styled.div`
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
   margin-bottom: 5px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 `;
 
 const StatLabel = styled.div`
@@ -151,14 +182,20 @@ const ItemsContainer = styled.div`
 
 const ShopItem = styled(motion.div)<{ selected?: boolean; unlocked?: boolean }>`
   margin-bottom: 15px;
-  border-radius: 15px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  border: ${props => props.selected ? '3px solid #FFD700' : 'none'};
+  border: ${props => props.selected ? '4px solid #FFD700' : '3px solid rgba(255, 255, 255, 0.3)'};
   background: ${props => props.unlocked 
     ? 'linear-gradient(135deg, #4ECDC4, #6EE7DF)'
     : 'linear-gradient(135deg, #FF6B6B, #FF8E8E)'};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+  }
 `;
 
 const ItemContent = styled.div`
@@ -214,18 +251,25 @@ const UnlockedText = styled.div`
 const BackButton = styled.button`
   background: linear-gradient(135deg, #4ECDC4, #6EE7DF);
   border: none;
-  border-radius: 15px;
-  padding: 15px;
+  border-radius: 20px;
+  padding: 18px;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(1.02);
   }
 `;
 
@@ -314,14 +358,21 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
 
   useEffect(() => {
     // Setup Telegram WebApp buttons
-    if (window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.BackButton.show();
-      tg.BackButton.onClick(onBackToMenu);
-      tg.MainButton.hide();
-    }
+    const setupTelegram = () => {
+      if (window.Telegram?.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.BackButton.show();
+        tg.BackButton.onClick(onBackToMenu);
+        tg.MainButton.hide();
+      }
+    };
+
+    // Попробуем сразу, а если не получится - через небольшую задержку
+    setupTelegram();
+    const timer = setTimeout(setupTelegram, 100);
 
     return () => {
+      clearTimeout(timer);
       if (window.Telegram?.WebApp) {
         window.Telegram.WebApp.BackButton.hide();
       }
