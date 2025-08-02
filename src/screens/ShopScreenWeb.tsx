@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import {GameState} from '../App';
+import { checkAchievements } from '../constants/achievements';
 
 const Container = styled.div`
   width: 100vw;
@@ -32,6 +33,71 @@ const Subtitle = styled.div`
   color: white;
   opacity: 0.9;
   margin-top: 10px;
+`;
+
+const ProfileSection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+`;
+
+const ProfileAvatar = styled.div`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+`;
+
+const ProfileInfo = styled.div`
+  text-align: left;
+`;
+
+const ProfileName = styled.div`
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+`;
+
+const ProfileStats = styled.div`
+  font-size: 14px;
+  opacity: 0.8;
+`;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+`;
+
+const StatCard = styled.div`
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+`;
+
+const StatValue = styled.div`
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 5px;
+`;
+
+const StatLabel = styled.div`
+  font-size: 12px;
+  opacity: 0.8;
 `;
 
 const CategoryContainer = styled.div`
@@ -446,18 +512,37 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
 
     const newCoins = gameState.coins - selectedItem.price;
     
+    // Добавляем опыт за покупку
+    const purchaseExperience = 25; // 25 опыта за покупку
+    const newExperience = gameState.experience + purchaseExperience;
+    const newLevel = Math.floor(newExperience / 100) + 1;
+    
+    // Проверяем ачивки после покупки
+    const newAchievements = checkAchievements({
+      ...gameState,
+      coins: newCoins,
+      experience: newExperience,
+      level: newLevel,
+    });
+    
     if (selectedItem.type === 'skin') {
       const newUnlockedSkins = [...gameState.unlockedSkins, selectedItem.id];
       onUpdateGameState({
         coins: newCoins,
         unlockedSkins: newUnlockedSkins,
         currentSkin: selectedItem.id,
+        experience: newExperience,
+        level: newLevel,
+        achievements: [...gameState.achievements, ...newAchievements],
       });
     } else {
       const newUnlockedFoods = [...gameState.unlockedFoods, selectedItem.id];
       onUpdateGameState({
         coins: newCoins,
         unlockedFoods: newUnlockedFoods,
+        experience: newExperience,
+        level: newLevel,
+        achievements: [...gameState.achievements, ...newAchievements],
       });
     }
     
@@ -467,7 +552,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
     // Show success notification
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-      window.Telegram.WebApp.showAlert(`"${selectedItem.name}" разблокирован!`);
+      window.Telegram.WebApp.showAlert(`"${selectedItem.name}" разблокирован! +25 опыта!`);
     }
   };
 
@@ -531,6 +616,41 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
         <Title>МАГАЗИН</Title>
         <Subtitle>🪙 {gameState.coins} монет</Subtitle>
       </Header>
+
+      {/* Профиль Telegram */}
+      <ProfileSection>
+        <ProfileAvatar>
+          {window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name?.charAt(0) || '👤'}
+        </ProfileAvatar>
+        <ProfileInfo>
+          <ProfileName>
+            {window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || 'Игрок'}
+          </ProfileName>
+          <ProfileStats>
+            Уровень {gameState.level} • {gameState.achievements.length} ачивок
+          </ProfileStats>
+        </ProfileInfo>
+      </ProfileSection>
+
+      {/* Статистика */}
+      <StatsGrid>
+        <StatCard>
+          <StatValue>⭐ {gameState.level}</StatValue>
+          <StatLabel>Уровень</StatLabel>
+        </StatCard>
+        <StatCard>
+          <StatValue>🎯 {gameState.totalGamesPlayed}</StatValue>
+          <StatLabel>Игр сыграно</StatLabel>
+        </StatCard>
+        <StatCard>
+          <StatValue>🏆 {gameState.highScore}</StatValue>
+          <StatLabel>Рекорд</StatLabel>
+        </StatCard>
+        <StatCard>
+          <StatValue>🏅 {gameState.achievements.length}</StatValue>
+          <StatLabel>Ачивки</StatLabel>
+        </StatCard>
+      </StatsGrid>
 
       {/* Категории */}
       <CategoryContainer>

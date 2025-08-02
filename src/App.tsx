@@ -33,6 +33,11 @@ export type GameState = {
   soundEnabled: boolean;
   vibrationEnabled: boolean;
   lives: number; // система жизней
+  level: number; // уровень игрока
+  experience: number; // опыт
+  achievements: string[]; // ачивки
+  totalGamesPlayed: number; // общее количество игр
+  totalScore: number; // общий счет
 };
 
 const defaultGameState: GameState = {
@@ -45,6 +50,11 @@ const defaultGameState: GameState = {
   soundEnabled: true,
   vibrationEnabled: true,
   lives: 3, // 3 сердца
+  level: 1, // начальный уровень
+  experience: 0, // начальный опыт
+  achievements: [], // пустой список ачивок
+  totalGamesPlayed: 0, // 0 игр сыграно
+  totalScore: 0, // 0 общего счета
 };
 
 export type Screen = 'menu' | 'game' | 'shop' | 'settings';

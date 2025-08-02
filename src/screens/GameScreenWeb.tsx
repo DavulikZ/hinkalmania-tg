@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {GameState} from '../App';
 import { SKIN_CONFIGS } from '../constants/game';
 import { getFoodConfig, getTrashConfig } from '../utils/gameUtils';
+import { checkAchievements, calculateLevel, ACHIEVEMENTS } from '../constants/achievements';
 
 const Container = styled.div`
   width: 100vw;
@@ -181,6 +182,45 @@ const ScorePopup = styled(motion.div)<{ x: number; y: number; score: number }>`
   }
 `;
 
+// Эффекты для игры
+const ParticleEffect = styled(motion.div)<{ x: number; y: number; color: string }>`
+  position: absolute;
+  left: ${props => props.x}px;
+  top: ${props => props.y}px;
+  width: 8px;
+  height: 8px;
+  background: ${props => props.color};
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 35;
+`;
+
+const ComboText = styled(motion.div)`
+  position: absolute;
+  color: #FFD700;
+  font-weight: bold;
+  font-size: 24px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  z-index: 40;
+`;
+
+const LevelUpEffect = styled(motion.div)`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: white;
+  font-weight: bold;
+  font-size: 32px;
+  padding: 20px 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  text-align: center;
+`;
+
 interface GameScreenProps {
   gameState: GameState;
   onUpdateGameState: (updates: Partial<GameState>) => void;
@@ -208,6 +248,29 @@ interface ScorePopupType {
   y: number;
 }
 
+interface ParticleType {
+  id: string;
+  x: number;
+  y: number;
+  color: string;
+  vx: number;
+  vy: number;
+}
+
+interface ComboType {
+  id: string;
+  text: string;
+  x: number;
+  y: number;
+}
+
+interface AchievementType {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
 // FOOD_TYPES и TRASH_TYPES импортируются из constants/game.ts
 
 const GameScreenWeb: React.FC<GameScreenProps> = ({
@@ -218,8 +281,14 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   const [score, setScore] = useState(0);
   const [foodItems, setFoodItems] = useState<FoodItemType[]>([]);
   const [scorePopups, setScorePopups] = useState<ScorePopupType[]>([]);
+  const [particles, setParticles] = useState<ParticleType[]>([]);
+  const [combos, setCombos] = useState<ComboType[]>([]);
   const [isGameActive, setIsGameActive] = useState(false);
   const [gameTime, setGameTime] = useState(60);
+  const [lives, setLives] = useState(gameState.lives);
+  const [currentCoins, setCurrentCoins] = useState(gameState.coins);
+  const [combo, setCombo] = useState(0);
+  const [showLevelUp, setShowLevelUp] = useState(false);
   const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth / 2 - 30, y: window.innerHeight - 180 });
   const [platePosition, setPlatePosition] = useState({ x: window.innerWidth / 2 - 50, y: window.innerHeight - 120 });
 
@@ -285,7 +354,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     }
   }, [isGameActive]);
 
-  // Простая анимация падающей еды
+  // Простая анимация падающей еды и частиц
   useEffect(() => {
     const animateFood = () => {
       if (!isGameActive) return;
@@ -295,6 +364,16 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
           ...item,
           y: item.y + 3 // простая скорость падения
         })).filter((item: FoodItemType) => item.y < window.innerHeight)
+      );
+      
+      // Анимация частиц
+      setParticles((prevParticles: ParticleType[]) => 
+        prevParticles.map((particle: ParticleType) => ({
+          ...particle,
+          x: particle.x + particle.vx,
+          y: particle.y + particle.vy,
+          vy: particle.vy + 0.1, // гравитация
+        })).filter((particle: ParticleType) => particle.y < window.innerHeight + 100)
       );
       
       animationFrameRef.current = requestAnimationFrame(animateFood);
@@ -315,6 +394,8 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     setIsGameActive(true);
     setScore(0);
     setGameTime(60);
+    setLives(gameState.lives);
+    setCurrentCoins(gameState.coins);
     setFoodItems([]);
     setScorePopups([]);
     
@@ -329,15 +410,74 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     const newHighScore = Math.max(gameState.highScore, score);
     const earnedCoins = Math.floor(score / 10);
     
+    // Обновляем статистику игры
+    const newTotalGamesPlayed = gameState.totalGamesPlayed + 1;
+    const newTotalScore = gameState.totalScore + score;
+    
+    // Проверяем ачивки
+    const newAchievements = checkAchievements({
+      ...gameState,
+      totalGamesPlayed: newTotalGamesPlayed,
+      totalScore: newTotalScore,
+      highScore: newHighScore,
+      coins: currentCoins + earnedCoins,
+    });
+    
+    // Добавляем опыт за игру
+    const gameExperience = Math.floor(score / 5) + (combo >= 5 ? 20 : 0); // опыт за игру + бонус за комбо
+    const newExperience = gameState.experience + gameExperience;
+    const newLevel = calculateLevel(newExperience);
+    
+    // Показываем эффект повышения уровня
+    if (newLevel > gameState.level) {
+      setShowLevelUp(true);
+      setTimeout(() => setShowLevelUp(false), 3000);
+    }
+    
     onUpdateGameState({
       highScore: newHighScore,
-      coins: gameState.coins + earnedCoins,
+      coins: currentCoins + earnedCoins,
+      totalGamesPlayed: newTotalGamesPlayed,
+      totalScore: newTotalScore,
+      experience: newExperience,
+      level: newLevel,
+      achievements: [...gameState.achievements, ...newAchievements],
     });
 
     // Telegram haptic feedback
     if (window.Telegram?.WebApp?.HapticFeedback) {
       window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
     }
+  };
+
+  const createParticles = (x: number, y: number, color: string) => {
+    const newParticles: ParticleType[] = [];
+    for (let i = 0; i < 8; i++) {
+      newParticles.push({
+        id: `particle-${Date.now()}-${i}`,
+        x,
+        y,
+        color,
+        vx: (Math.random() - 0.5) * 4,
+        vy: (Math.random() - 0.5) * 4,
+      });
+    }
+    setParticles(prev => [...prev, ...newParticles]);
+    
+    // Удаляем частицы через 1 секунду
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => !newParticles.some(np => np.id === p.id)));
+    }, 1000);
+  };
+
+  const createCombo = (x: number, y: number, text: string) => {
+    const comboId = `combo-${Date.now()}`;
+    setCombos(prev => [...prev, { id: comboId, text, x, y }]);
+    
+    // Удаляем комбо через 2 секунды
+    setTimeout(() => {
+      setCombos(prev => prev.filter(c => c.id !== comboId));
+    }, 2000);
   };
 
   const spawnFood = () => {
@@ -384,17 +524,46 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       // Обработка негативных блюд (не кавказская кухня)
       itemConfig = getTrashConfig(foodItem.type);
       newScore = Math.max(0, score + itemConfig.points); // очки не могут быть отрицательными
-      newCoins = Math.max(0, gameState.coins + itemConfig.coins); // монеты не могут быть отрицательными
+      newCoins = Math.max(0, currentCoins + itemConfig.coins); // монеты не могут быть отрицательными
       hapticType = 'heavy'; // сильная вибрация для негативной еды
+      
+      // Создаем красные частицы для мусора
+      createParticles(foodItem.x + 30, foodItem.y + 30, '#FF4444');
+      
+      // Уменьшаем жизни при сборе мусора
+      const newLives = Math.max(0, lives - 1);
+      setLives(newLives);
+      
+      // Сбрасываем комбо при сборе мусора
+      setCombo(0);
+      
+      // Если жизни закончились, заканчиваем игру
+      if (newLives <= 0) {
+        endGame();
+        return;
+      }
     } else {
       // Обработка кавказской еды
       itemConfig = getFoodConfig(foodItem.type);
       newScore = score + itemConfig.points;
-      newCoins = gameState.coins + itemConfig.coins;
+      newCoins = currentCoins + itemConfig.coins;
       hapticType = 'light';
+      
+      // Создаем золотые частицы для хорошей еды
+      createParticles(foodItem.x + 30, foodItem.y + 30, '#FFD700');
+      
+      // Увеличиваем комбо
+      const newCombo = combo + 1;
+      setCombo(newCombo);
+      
+      // Показываем комбо текст
+      if (newCombo >= 3) {
+        createCombo(foodItem.x + 30, foodItem.y - 20, `COMBO x${newCombo}!`);
+      }
     }
     
     setScore(newScore);
+    setCurrentCoins(newCoins);
     onUpdateGameState({coins: newCoins});
 
     // Remove item
@@ -433,9 +602,23 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
           <InfoValue>{score}</InfoValue>
         </InfoItem>
         <InfoItem>
-          <InfoLabel>Монеты</InfoLabel>
-          <InfoValue>🪙 {gameState.coins}</InfoValue>
+          <InfoLabel>Уровень</InfoLabel>
+          <InfoValue>⭐ {gameState.level}</InfoValue>
         </InfoItem>
+        <InfoItem>
+          <InfoLabel>Монеты</InfoLabel>
+          <InfoValue>🪙 {currentCoins}</InfoValue>
+        </InfoItem>
+        <InfoItem>
+          <InfoLabel>Жизни</InfoLabel>
+          <InfoValue>❤️ {lives}</InfoValue>
+        </InfoItem>
+        {combo >= 3 && (
+          <InfoItem>
+            <InfoLabel>Комбо</InfoLabel>
+            <InfoValue>🔥 x{combo}</InfoValue>
+          </InfoItem>
+        )}
       </TopPanel>
 
       {/* Игровая область */}
@@ -479,6 +662,36 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 1 }}>
             </ScorePopup>
+          ))}
+        </AnimatePresence>
+
+        {/* Particles */}
+        <AnimatePresence>
+          {particles.map(particle => (
+            <ParticleEffect
+              key={particle.id}
+              x={particle.x}
+              y={particle.y}
+              color={particle.color}
+              initial={{ scale: 1, opacity: 1 }}
+              animate={{ scale: 0, opacity: 0 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 1 }}>
+            </ParticleEffect>
+          ))}
+        </AnimatePresence>
+
+        {/* Combo texts */}
+        <AnimatePresence>
+          {combos.map(comboItem => (
+            <ComboText
+              key={comboItem.id}
+              initial={{ opacity: 1, y: comboItem.y, scale: 0.5 }}
+              animate={{ opacity: 0, y: comboItem.y - 100, scale: 1.5 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2 }}>
+              {comboItem.text}
+            </ComboText>
           ))}
         </AnimatePresence>
 
@@ -541,6 +754,21 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
           МЕНЮ
         </GameButton>
       </ButtonContainer>
+
+      {/* Эффект повышения уровня */}
+      <AnimatePresence>
+        {showLevelUp && (
+          <LevelUpEffect
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ duration: 0.5 }}>
+            🎉 УРОВЕНЬ ПОВЫШЕН! 🎉
+            <br />
+            <span style={{ fontSize: '24px' }}>Уровень {gameState.level + 1}</span>
+          </LevelUpEffect>
+        )}
+      </AnimatePresence>
     </Container>
   );
 };
