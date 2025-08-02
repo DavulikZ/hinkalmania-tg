@@ -1,6 +1,6 @@
 {
   "name": "hinkalimaniia-tg",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Хинкалимания - Telegram Mini App",
   "main": "src/index.tsx",
   "homepage": ".",

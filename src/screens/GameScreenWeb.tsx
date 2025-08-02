@@ -469,8 +469,8 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     
     // Обновляем state для синхронизации (с throttling)
     requestAnimationFrame(() => {
-      setPlayerPosition({ x: newX - 30, y: newY });
-      setPlatePosition({ x: newX - 50, y: newY + 60 });
+    setPlayerPosition({ x: newX - 30, y: newY });
+    setPlatePosition({ x: newX - 50, y: newY + 60 });
     });
   }, [isGameActive]);
 
@@ -488,7 +488,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
 
       // Простой спавн еды каждые 1.5 секунды
       const foodSpawnerInterval = setInterval(() => {
-        spawnFood();
+          spawnFood();
       }, 1500);
 
       return () => {
@@ -520,7 +520,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         })).filter((particle: ParticleType) => particle.y < window.innerHeight + 100)
       );
       
-      animationFrameRef.current = requestAnimationFrame(animateFood);
+        animationFrameRef.current = requestAnimationFrame(animateFood);
     };
 
     if (isGameActive) {

@@ -416,7 +416,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       type: 'skin',
       emoji: '🚶🏽‍♂️',
       image: '/images/characters/caucasian-default.png',
-      isUnlocked: gameState.unlockedSkins.includes('default'),
+      isUnlocked: gameState.unlockedSkins?.includes('default') || false,
       isSelected: gameState.currentSkin === 'default',
     },
     {
@@ -427,7 +427,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       type: 'skin',
       emoji: '👨‍🍳',
       image: '/images/characters/caucasian-chef.png',
-      isUnlocked: gameState.unlockedSkins.includes('chef'),
+      isUnlocked: gameState.unlockedSkins?.includes('chef') || false,
       isSelected: gameState.currentSkin === 'chef',
     },
     {
@@ -438,7 +438,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       type: 'skin',
       emoji: '⚔️',
       image: '/images/characters/caucasian-warrior.png',
-      isUnlocked: gameState.unlockedSkins.includes('warrior'),
+      isUnlocked: gameState.unlockedSkins?.includes('warrior') || false,
       isSelected: gameState.currentSkin === 'warrior',
     },
     {
@@ -449,7 +449,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       type: 'skin',
       emoji: '👴',
       image: '/images/characters/caucasian-elder.png',
-      isUnlocked: gameState.unlockedSkins.includes('elder'),
+      isUnlocked: gameState.unlockedSkins?.includes('elder') || false,
       isSelected: gameState.currentSkin === 'elder',
     },
     {
@@ -460,7 +460,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       type: 'skin',
       emoji: '💃',
       image: '/images/characters/caucasian-dancer.png',
-      isUnlocked: gameState.unlockedSkins.includes('dancer'),
+      isUnlocked: gameState.unlockedSkins?.includes('dancer') || false,
       isSelected: gameState.currentSkin === 'dancer',
     },
     {
@@ -471,7 +471,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       type: 'skin',
       emoji: '🏹',
       image: '/images/characters/caucasian-hunter.png',
-      isUnlocked: gameState.unlockedSkins.includes('hunter'),
+      isUnlocked: gameState.unlockedSkins?.includes('hunter') || false,
       isSelected: gameState.currentSkin === 'hunter',
     },
     {
@@ -482,7 +482,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       type: 'skin',
       emoji: '🐑',
       image: '/images/characters/caucasian-shepherd.png',
-      isUnlocked: gameState.unlockedSkins.includes('shepherd'),
+      isUnlocked: gameState.unlockedSkins?.includes('shepherd') || false,
       isSelected: gameState.currentSkin === 'shepherd',
     },
   ];
@@ -495,7 +495,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 0,
       type: 'food',
       emoji: '🦪',
-      isUnlocked: gameState.unlockedFoods.includes('hinkali'),
+      isUnlocked: gameState.unlockedFoods?.includes('hinkali') || false,
       isSelected: false,
     },
     {
@@ -505,7 +505,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 100,
       type: 'food',
       emoji: '🍲',
-      isUnlocked: gameState.unlockedFoods.includes('harcho'),
+      isUnlocked: gameState.unlockedFoods?.includes('harcho') || false,
       isSelected: false,
     },
     {
@@ -515,7 +515,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 250,
       type: 'food',
       emoji: '🥧',
-      isUnlocked: gameState.unlockedFoods.includes('adjarski'),
+      isUnlocked: gameState.unlockedFoods?.includes('adjarski') || false,
       isSelected: false,
     },
     {
@@ -525,7 +525,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 400,
       type: 'food',
       emoji: '🍞🍞',
-      isUnlocked: gameState.unlockedFoods.includes('megruli'),
+      isUnlocked: gameState.unlockedFoods?.includes('megruli') || false,
       isSelected: false,
     },
     {
@@ -535,7 +535,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 600,
       type: 'food',
       emoji: '🫘',
-      isUnlocked: gameState.unlockedFoods.includes('lobio'),
+      isUnlocked: gameState.unlockedFoods?.includes('lobio') || false,
       isSelected: false,
     },
     {
@@ -545,7 +545,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 800,
       type: 'food',
       emoji: '🦃',
-      isUnlocked: gameState.unlockedFoods.includes('satsivi'),
+      isUnlocked: gameState.unlockedFoods?.includes('satsivi') || false,
       isSelected: false,
     },
     {
@@ -555,7 +555,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 1200,
       type: 'food',
       emoji: '🍖',
-      isUnlocked: gameState.unlockedFoods.includes('chakapuli'),
+      isUnlocked: gameState.unlockedFoods?.includes('chakapuli') || false,
       isSelected: false,
     },
   ];
@@ -604,26 +604,26 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       level: newLevel,
     });
     
-    if (selectedItem.type === 'skin') {
-      const newUnlockedSkins = [...gameState.unlockedSkins, selectedItem.id];
-      onUpdateGameState({
-        coins: newCoins,
-        unlockedSkins: newUnlockedSkins,
-        currentSkin: selectedItem.id,
-        experience: newExperience,
-        level: newLevel,
-        achievements: [...gameState.achievements, ...newAchievements],
-      });
-    } else {
-      const newUnlockedFoods = [...gameState.unlockedFoods, selectedItem.id];
-      onUpdateGameState({
-        coins: newCoins,
-        unlockedFoods: newUnlockedFoods,
-        experience: newExperience,
-        level: newLevel,
-        achievements: [...gameState.achievements, ...newAchievements],
-      });
-    }
+         if (selectedItem.type === 'skin') {
+       const newUnlockedSkins = [...(gameState.unlockedSkins || []), selectedItem.id];
+       onUpdateGameState({
+         coins: newCoins,
+         unlockedSkins: newUnlockedSkins,
+         currentSkin: selectedItem.id,
+         experience: newExperience,
+         level: newLevel,
+         achievements: [...(gameState.achievements || []), ...newAchievements],
+       });
+     } else {
+       const newUnlockedFoods = [...(gameState.unlockedFoods || []), selectedItem.id];
+       onUpdateGameState({
+         coins: newCoins,
+         unlockedFoods: newUnlockedFoods,
+         experience: newExperience,
+         level: newLevel,
+         achievements: [...(gameState.achievements || []), ...newAchievements],
+       });
+     }
     
     setShowConfirmDialog(false);
     setSelectedItem(null);
@@ -706,7 +706,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
             {window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || 'Игрок'}
           </ProfileName>
           <ProfileStats>
-            Уровень {gameState.level} • {gameState.achievements.length} ачивок
+            Уровень {gameState.level} • {gameState.achievements?.length || 0} ачивок
           </ProfileStats>
         </ProfileInfo>
       </ProfileSection>
@@ -726,7 +726,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
           <StatLabel>Рекорд</StatLabel>
         </StatCard>
         <StatCard>
-          <StatValue>🏅 {gameState.achievements.length}</StatValue>
+          <StatValue>🏅 {gameState.achievements?.length || 0}</StatValue>
           <StatLabel>Ачивки</StatLabel>
         </StatCard>
       </StatsGrid>
