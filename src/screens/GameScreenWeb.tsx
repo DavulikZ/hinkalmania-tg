@@ -485,7 +485,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
           y={playerPosition.y}
           animate={{ x: playerPosition.x, y: playerPosition.y }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}>
-          <PlayerEmoji>{SKIN_CONFIGS[gameState.currentSkin]?.emoji || '🚶🏽‍♂️'}</PlayerEmoji>
+          <PlayerEmoji>{SKIN_CONFIGS[gameState.currentSkin as keyof typeof SKIN_CONFIGS]?.emoji || '🚶🏽‍♂️'}</PlayerEmoji>
         </Player>
 
         {/* Тарелка */}
