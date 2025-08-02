@@ -85,21 +85,25 @@ const FoodEmoji = styled.div`
 
 const Player = styled(motion.div)<{ x: number; y: number }>`
   position: absolute;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 50%;
   left: ${props => props.x}px;
   top: ${props => props.y}px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  z-index: 20;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  z-index: 25;
+  border: 2px solid rgba(255, 255, 255, 0.8);
 `;
 
-const PlayerEmoji = styled.div`
-  font-size: 30px;
+const PlayerImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 `;
 
 const Plate = styled(motion.div)<{ x: number; y: number }>`
@@ -211,8 +215,8 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   const [scorePopups, setScorePopups] = useState<ScorePopupType[]>([]);
   const [isGameActive, setIsGameActive] = useState(false);
   const [gameTime, setGameTime] = useState(60);
-  const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth / 2 - 25, y: window.innerHeight - 200 });
-  const [platePosition, setPlatePosition] = useState({ x: window.innerWidth / 2 - 50, y: window.innerHeight - 150 });
+  const [playerPosition, setPlayerPosition] = useState({ x: window.innerWidth / 2 - 30, y: window.innerHeight - 180 });
+  const [platePosition, setPlatePosition] = useState({ x: window.innerWidth / 2 - 50, y: window.innerHeight - 120 });
 
   
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -228,11 +232,11 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     const clientX = 'touches' in e ? (e as any).touches[0]?.clientX : (e as React.MouseEvent).clientX;
     if (clientX === undefined) return;
     
-    const newX = Math.max(25, Math.min(window.innerWidth - 25, clientX - rect.left));
-    const newY = window.innerHeight - 200;
+    const newX = Math.max(30, Math.min(window.innerWidth - 30, clientX - rect.left));
+    const newY = window.innerHeight - 180;
     
-    setPlayerPosition({ x: newX - 25, y: newY });
-    setPlatePosition({ x: newX - 50, y: newY + 50 });
+    setPlayerPosition({ x: newX - 30, y: newY });
+    setPlatePosition({ x: newX - 50, y: newY + 60 });
   }, [isGameActive]);
 
   useEffect(() => {
@@ -261,8 +265,10 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         }, currentSpawnInterval);
       };
 
-      // Обновляем интервал спавна каждые 2 секунды
+      // Сразу начинаем спавнить еду
       updateSpawnRate();
+      
+      // Обновляем интервал спавна каждые 2 секунды
       const spawnRateUpdater = setInterval(updateSpawnRate, 2000);
 
       return () => {
@@ -485,7 +491,20 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
           y={playerPosition.y}
           animate={{ x: playerPosition.x, y: playerPosition.y }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}>
-          <PlayerEmoji>{SKIN_CONFIGS[gameState.currentSkin as keyof typeof SKIN_CONFIGS]?.emoji || '🚶🏽‍♂️'}</PlayerEmoji>
+          <PlayerImage
+            src={SKIN_CONFIGS[gameState.currentSkin as keyof typeof SKIN_CONFIGS]?.image || '/images/characters/caucasian-default.png'}
+            alt="Кавказец"
+            onError={(e) => {
+              // Fallback к эмодзи если изображение не загрузилось
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const fallback = document.createElement('div');
+              fallback.textContent = '🚶🏽‍♂️';
+              fallback.style.fontSize = '40px';
+              fallback.style.filter = 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5))';
+              target.parentNode?.appendChild(fallback);
+            }}
+          />
         </Player>
 
         {/* Тарелка */}

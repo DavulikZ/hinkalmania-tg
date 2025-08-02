@@ -192,7 +192,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
 
       {/* Декоративные элементы */}
       <DecorativeContainer>
-        <DecorativeText>🥟 🥙 🍖 🥪</DecorativeText>
+        <DecorativeText>Game now on test :) </DecorativeText>
       </DecorativeContainer>
     </Container>
   );

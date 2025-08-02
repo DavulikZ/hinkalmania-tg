@@ -20,43 +20,43 @@ export const TRASH_TYPES: Record<string, FoodConfig> = {
 
 export const SKIN_CONFIGS = {
   default: {
-    emoji: '🚶🏽‍♂️', // кавказец спиной (показывает спину и папаху)
+    image: '/images/characters/caucasian-default.png',
     name: 'Классический кавказец',
     description: 'Кавказец в традиционной папахе, повернут спиной',
     price: 0,
   },
   chef: {
-    emoji: '👨‍🍳',
+    image: '/images/characters/caucasian-chef.png',
     name: 'Повар-кавказец',
     description: 'Кавказец в поварском колпаке',
     price: 200,
   },
   warrior: {
-    emoji: '⚔️',
+    image: '/images/characters/caucasian-warrior.png',
     name: 'Воин-кавказец',
     description: 'Кавказец с саблей и кинжалом',
     price: 500,
   },
   elder: {
-    emoji: '👴',
+    image: '/images/characters/caucasian-elder.png',
     name: 'Старейшина-кавказец',
     description: 'Кавказец с длинной бородой',
     price: 1000,
   },
   dancer: {
-    emoji: '💃',
+    image: '/images/characters/caucasian-dancer.png',
     name: 'Танцор-кавказец',
     description: 'Кавказец в танцевальном костюме',
     price: 1500,
   },
   hunter: {
-    emoji: '🏹',
+    image: '/images/characters/caucasian-hunter.png',
     name: 'Охотник-кавказец',
     description: 'Кавказец с ружьем',
     price: 2500,
   },
   shepherd: {
-    emoji: '🐑',
+    image: '/images/characters/caucasian-shepherd.png',
     name: 'Пастух-кавказец',
     description: 'Кавказец с посохом',
     price: 3500,

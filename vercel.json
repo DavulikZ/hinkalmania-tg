@@ -44,7 +44,7 @@
   ],
   "env": {
     "REACT_APP_TELEGRAM_BOT_NAME": "hinkalmania_bot",
-    "REACT_APP_VERSION": "2.1.2",
+    "REACT_APP_VERSION": "2.2.0",
     "REACT_APP_GAME_TITLE": "Хинкалимания"
   }
 }

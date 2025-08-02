@@ -232,6 +232,7 @@ interface ShopItemType {
   price: number;
   type: 'skin' | 'food';
   emoji: string;
+  image?: string;
   isUnlocked: boolean;
   isSelected: boolean;
 }
@@ -269,6 +270,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 0,
       type: 'skin',
       emoji: '🚶🏽‍♂️',
+      image: '/images/characters/caucasian-default.png',
       isUnlocked: gameState.unlockedSkins.includes('default'),
       isSelected: gameState.currentSkin === 'default',
     },
@@ -279,6 +281,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 200,
       type: 'skin',
       emoji: '👨‍🍳',
+      image: '/images/characters/caucasian-chef.png',
       isUnlocked: gameState.unlockedSkins.includes('chef'),
       isSelected: gameState.currentSkin === 'chef',
     },
@@ -289,6 +292,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 500,
       type: 'skin',
       emoji: '⚔️',
+      image: '/images/characters/caucasian-warrior.png',
       isUnlocked: gameState.unlockedSkins.includes('warrior'),
       isSelected: gameState.currentSkin === 'warrior',
     },
@@ -299,6 +303,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 1000,
       type: 'skin',
       emoji: '👴',
+      image: '/images/characters/caucasian-elder.png',
       isUnlocked: gameState.unlockedSkins.includes('elder'),
       isSelected: gameState.currentSkin === 'elder',
     },
@@ -309,6 +314,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 1500,
       type: 'skin',
       emoji: '💃',
+      image: '/images/characters/caucasian-dancer.png',
       isUnlocked: gameState.unlockedSkins.includes('dancer'),
       isSelected: gameState.currentSkin === 'dancer',
     },
@@ -319,6 +325,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 2500,
       type: 'skin',
       emoji: '🏹',
+      image: '/images/characters/caucasian-hunter.png',
       isUnlocked: gameState.unlockedSkins.includes('hunter'),
       isSelected: gameState.currentSkin === 'hunter',
     },
@@ -329,6 +336,7 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       price: 3500,
       type: 'skin',
       emoji: '🐑',
+      image: '/images/characters/caucasian-shepherd.png',
       isUnlocked: gameState.unlockedSkins.includes('shepherd'),
       isSelected: gameState.currentSkin === 'shepherd',
     },
@@ -478,7 +486,25 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
       onClick={() => handleItemClick(item)}>
       <ItemContent>
         <ItemHeader>
-          <ItemEmoji>{item.emoji}</ItemEmoji>
+          {item.type === 'skin' && item.image ? (
+            <ItemEmoji>
+              <img 
+                src={item.image} 
+                alt={item.name}
+                style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const fallback = document.createElement('div');
+                  fallback.textContent = item.emoji;
+                  fallback.style.fontSize = '40px';
+                  target.parentNode?.appendChild(fallback);
+                }}
+              />
+            </ItemEmoji>
+          ) : (
+            <ItemEmoji>{item.emoji}</ItemEmoji>
+          )}
           <ItemInfo>
             <ItemName>{item.name}</ItemName>
             <ItemDescription>{item.description}</ItemDescription>
