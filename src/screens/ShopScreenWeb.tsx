@@ -12,7 +12,15 @@ const Container = styled.div`
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #FECFEF 100%);
+  background: 
+    linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(101, 67, 33, 0.9) 50%, rgba(139, 69, 19, 0.9) 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(160, 82, 45, 0.1) 10px,
+      rgba(160, 82, 45, 0.1) 20px
+    );
   font-family: 'Comic Sans MS', cursive, sans-serif;
 `;
 
@@ -359,22 +367,42 @@ const ShopScreenWeb: React.FC<ShopScreenProps> = ({
   useEffect(() => {
     // Setup Telegram WebApp buttons
     const setupTelegram = () => {
-      if (window.Telegram?.WebApp) {
-        const tg = window.Telegram.WebApp;
-        tg.BackButton.show();
-        tg.BackButton.onClick(onBackToMenu);
-        tg.MainButton.hide();
+      try {
+        if (window.Telegram?.WebApp) {
+          const tg = window.Telegram.WebApp;
+          tg.BackButton.show();
+          tg.BackButton.onClick(onBackToMenu);
+          tg.MainButton.hide();
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.warn('Telegram WebApp not available:', error);
+        return false;
       }
     };
 
-    // Попробуем сразу, а если не получится - через небольшую задержку
-    setupTelegram();
-    const timer = setTimeout(setupTelegram, 100);
+    // Try multiple times with increasing delays
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    const trySetup = () => {
+      if (setupTelegram() || attempts >= maxAttempts) {
+        return;
+      }
+      attempts++;
+      setTimeout(trySetup, 200 * attempts);
+    };
+
+    trySetup();
 
     return () => {
-      clearTimeout(timer);
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.BackButton.hide();
+      try {
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.BackButton.hide();
+        }
+      } catch (error) {
+        console.warn('Error hiding Telegram button:', error);
       }
     };
   }, [onBackToMenu]);

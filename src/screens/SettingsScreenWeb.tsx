@@ -11,6 +11,16 @@ const Container = styled.div`
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  background: 
+    linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(101, 67, 33, 0.9) 50%, rgba(139, 69, 19, 0.9) 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(160, 82, 45, 0.1) 10px,
+      rgba(160, 82, 45, 0.1) 20px
+    );
+  font-family: 'Comic Sans MS', cursive, sans-serif;
 `;
 
 const Header = styled.div`

@@ -9,10 +9,17 @@ import { checkAchievements, calculateLevel } from '../constants/achievements';
 const Container = styled.div`
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
   position: relative;
-  user-select: none;
-  background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #FECFEF 100%);
+  overflow: hidden;
+  background: 
+    linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(101, 67, 33, 0.9) 50%, rgba(139, 69, 19, 0.9) 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(160, 82, 45, 0.1) 10px,
+      rgba(160, 82, 45, 0.1) 20px
+    );
   font-family: 'Comic Sans MS', cursive, sans-serif;
 `;
 
@@ -577,23 +584,22 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       // Сбрасываем комбо при сборе мусора
       setCombo(0);
       
-      // Если жизни закончились, начинаем игру заново
+      // Если жизни закончились, завершаем игру
       if (newLives <= 0) {
-        // Сбрасываем состояние игры
-        setScore(0);
-        setGameTime(60);
-        setLives(gameState.lives);
-        setCurrentCoins(gameState.coins);
-        setFoodItems([]);
-        setScorePopups([]);
-        setCombo(0);
-        setParticles([]);
-        setCombos([]);
-        
         // Telegram haptic feedback
         if (window.Telegram?.WebApp?.HapticFeedback) {
           window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
         }
+        
+        // Обновляем статистику игры
+        onUpdateGameState({
+          totalGamesPlayed: gameState.totalGamesPlayed + 1,
+          totalScore: gameState.totalScore + score,
+          highScore: Math.max(gameState.highScore, score)
+        });
+        
+        // Возвращаемся в меню
+        onBackToMenu();
         return;
       }
     } else {

@@ -10,9 +10,17 @@ import SettingsScreen from './screens/SettingsScreenWeb';
 const AppContainer = styled.div`
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1);
+  background: 
+    linear-gradient(135deg, rgba(139, 69, 19, 0.9) 0%, rgba(101, 67, 33, 0.9) 50%, rgba(139, 69, 19, 0.9) 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(160, 82, 45, 0.1) 10px,
+      rgba(160, 82, 45, 0.1) 20px
+    );
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
 `;
 
 // Get viewport dimensions (currently unused but may be needed later)
