@@ -83,7 +83,7 @@ const FoodEmoji = styled.div`
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 `;
 
-const Player = styled(motion.div)<{ x: number; y: number }>`
+const Player = styled(motion.div)<PositionProps>`
   position: absolute;
   width: 60px;
   height: 60px;
@@ -92,11 +92,11 @@ const Player = styled(motion.div)<{ x: number; y: number }>`
   justify-content: center;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 50%;
-  left: ${props => props.x}px;
-  top: ${props => props.y}px;
+  transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   z-index: 25;
   border: 2px solid rgba(255, 255, 255, 0.8);
+  will-change: transform;
 `;
 
 const PlayerImage = styled.img`
@@ -106,16 +106,16 @@ const PlayerImage = styled.img`
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 `;
 
-const Plate = styled(motion.div)<{ x: number; y: number }>`
+const Plate = styled(motion.div)<PositionProps>`
   position: absolute;
   width: 100px;
   height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  left: ${props => props.x}px;
-  top: ${props => props.y}px;
+  transform: translate(${(props: PositionProps) => props.x}px, ${(props: PositionProps) => props.y}px);
   z-index: 15;
+  will-change: transform;
 `;
 
 const PlateEmoji = styled.div`
@@ -167,9 +167,9 @@ const GameButton = styled.button`
 
 const ScorePopup = styled(motion.div)<{ x: number; y: number; score: number }>`
   position: absolute;
-  left: ${props => props.x}px;
-  top: ${props => props.y}px;
-  color: ${props => props.score >= 0 ? '#FFD700' : '#FF4444'};
+  left: ${(props: { x: number; y: number; score: number }) => props.x}px;
+  top: ${(props: { x: number; y: number; score: number }) => props.y}px;
+  color: ${(props: { x: number; y: number; score: number }) => props.score >= 0 ? '#FFD700' : '#FF4444'};
   font-weight: bold;
   font-size: 18px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
@@ -177,7 +177,7 @@ const ScorePopup = styled(motion.div)<{ x: number; y: number; score: number }>`
   z-index: 30;
   
   &::before {
-    content: ${props => props.score >= 0 ? '"+' + props.score + '"' : '"' + props.score + '"'};
+    content: ${(props: { x: number; y: number; score: number }) => props.score >= 0 ? '"+' + props.score + '"' : '"' + props.score + '"'};
   }
 `;
 
@@ -196,6 +196,11 @@ interface FoodItemType {
   fallSpeed?: number;
 }
 
+interface PositionProps {
+  x: number;
+  y: number;
+}
+
 interface ScorePopupType {
   id: string;
   score: number;
@@ -209,7 +214,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   gameState,
   onUpdateGameState,
   onBackToMenu,
-}) => {
+}: GameScreenProps) => {
   const [score, setScore] = useState(0);
   const [foodItems, setFoodItems] = useState<FoodItemType[]>([]);
   const [scorePopups, setScorePopups] = useState<ScorePopupType[]>([]);
@@ -222,9 +227,11 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
 
-  // Touch/Mouse handling
+  // Touch/Mouse handling - оптимизированная версия без задержки
   const handlePointerMove = useCallback((e: React.PointerEvent | React.MouseEvent) => {
     if (!isGameActive) return;
+    
+    e.preventDefault(); // Предотвращаем стандартное поведение браузера
     
     const rect = gameAreaRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -235,14 +242,29 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     const newX = Math.max(30, Math.min(window.innerWidth - 30, clientX - rect.left));
     const newY = window.innerHeight - 180;
     
-    setPlayerPosition({ x: newX - 30, y: newY });
-    setPlatePosition({ x: newX - 50, y: newY + 60 });
+    // Немедленное обновление позиции без React state для максимальной отзывчивости
+    const playerElement = document.querySelector('[data-player]') as HTMLElement;
+    const plateElement = document.querySelector('[data-plate]') as HTMLElement;
+    
+    if (playerElement) {
+      playerElement.style.transform = `translate(${newX - 30}px, ${newY}px)`;
+    }
+    
+    if (plateElement) {
+      plateElement.style.transform = `translate(${newX - 50}px, ${newY + 60}px)`;
+    }
+    
+    // Обновляем state для синхронизации (с throttling)
+    requestAnimationFrame(() => {
+      setPlayerPosition({ x: newX - 30, y: newY });
+      setPlatePosition({ x: newX - 50, y: newY + 60 });
+    });
   }, [isGameActive]);
 
   useEffect(() => {
     if (isGameActive) {
       const timer = setInterval(() => {
-        setGameTime(prev => {
+        setGameTime((prev: number) => {
           if (prev <= 1) {
             endGame();
             return 0;
@@ -252,7 +274,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
       }, 1000);
 
       // Динамический спавн еды с увеличивающейся частотой
-      let foodSpawnerInterval: NodeJS.Timeout;
+      let foodSpawnerInterval: number;
       
       const updateSpawnRate = () => {
         if (foodSpawnerInterval) clearInterval(foodSpawnerInterval);
@@ -279,23 +301,27 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     }
   }, [isGameActive, gameTime]);
 
-  // Animation loop for falling food with variable speed
+  // Animation loop for falling food with variable speed - оптимизированная версия
   useEffect(() => {
-    const animateFood = () => {
+    let lastTime = 0;
+    const animateFood = (currentTime: number) => {
+      if (!isGameActive) return;
+      
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+      
       const currentGameTime = (60 - gameTime) * 1000;
       const baseFallSpeed = getCurrentFallSpeed(currentGameTime);
-      const normalizedSpeed = 3000 / baseFallSpeed; // нормализуем для 60fps
+      const normalizedSpeed = (baseFallSpeed / 1000) * deltaTime; // скорость в пикселях за кадр
       
-      setFoodItems(prevItems => 
-        prevItems.map(item => ({
+      setFoodItems((prevItems: FoodItemType[]) => 
+        prevItems.map((item: FoodItemType) => ({
           ...item,
-          y: item.y + (item.fallSpeed || normalizedSpeed) // индивидуальная или базовая скорость
-        })).filter(item => item.y < window.innerHeight)
+          y: item.y + (item.fallSpeed || normalizedSpeed * 60) // индивидуальная или базовая скорость
+        })).filter((item: FoodItemType) => item.y < window.innerHeight)
       );
       
-      if (isGameActive) {
-        animationFrameRef.current = requestAnimationFrame(animateFood);
-      }
+      animationFrameRef.current = requestAnimationFrame(animateFood);
     };
 
     if (isGameActive) {
@@ -487,10 +513,11 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
 
         {/* Игрок (кавказец) */}
         <Player
+          data-player
           x={playerPosition.x}
           y={playerPosition.y}
           animate={{ x: playerPosition.x, y: playerPosition.y }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}>
+          transition={{ duration: 0.1, ease: "linear" }}>
           <PlayerImage
             src={SKIN_CONFIGS[gameState.currentSkin as keyof typeof SKIN_CONFIGS]?.image || '/images/characters/caucasian-default.png'}
             alt="Кавказец"
@@ -509,10 +536,11 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
 
         {/* Тарелка */}
         <Plate
+          data-plate
           x={platePosition.x}
           y={platePosition.y}
           animate={{ x: platePosition.x, y: platePosition.y }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}>
+          transition={{ duration: 0.1, ease: "linear" }}>
           <PlateEmoji>🍽️</PlateEmoji>
         </Plate>
       </GameArea>

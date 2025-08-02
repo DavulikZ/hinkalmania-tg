@@ -65,9 +65,9 @@ export const SKIN_CONFIGS = {
 
 export const GAME_SETTINGS = {
   GAME_DURATION: 60, // секунды
-  FOOD_SPAWN_INTERVAL: 2000, // миллисекунды (начальный интервал)
-  FOOD_FALL_DURATION: 3000, // миллисекунды (начальная скорость)
-  COLLECTION_ANIMATION_DURATION: 400, // миллисекунды
+  FOOD_SPAWN_INTERVAL: 1500, // миллисекунды (более быстрый начальный интервал)
+  FOOD_FALL_DURATION: 2500, // миллисекунды (более быстрая начальная скорость)
+  COLLECTION_ANIMATION_DURATION: 200, // миллисекунды (более быстрая анимация)
   INITIAL_COINS: 100,
   BONUS_COINS_PER_SCORE: 10, // монет за каждые 10 очков
   
@@ -78,17 +78,17 @@ export const GAME_SETTINGS = {
   FOOD_START_DELAY: 0, // еда начинает падать сразу при старте игры
   
   // Улучшенная система скорости
-  SPEED_INCREASE_INTERVAL: 8000, // каждые 8 секунд ускорение (чаще!)
-  SPEED_MULTIPLIER: 0.8, // коэффициент ускорения (быстрее!)
-  MIN_FALL_DURATION: 800, // минимальная скорость падения (быстрее!)
+  SPEED_INCREASE_INTERVAL: 6000, // каждые 6 секунд ускорение (еще чаще!)
+  SPEED_MULTIPLIER: 0.75, // коэффициент ускорения (еще быстрее!)
+  MIN_FALL_DURATION: 600, // минимальная скорость падения (еще быстрее!)
   
   // Система увеличения количества еды
-  SPAWN_SPEED_MULTIPLIER: 0.85, // интервал спавна также ускоряется
-  MIN_SPAWN_INTERVAL: 800, // минимальный интервал между спавном
+  SPAWN_SPEED_MULTIPLIER: 0.8, // интервал спавна также ускоряется
+  MIN_SPAWN_INTERVAL: 600, // минимальный интервал между спавном
   
   // Система мусора
   TRASH_SPAWN_CHANCE: 0.15, // начальный шанс мусора 15%
-  TRASH_INCREASE_RATE: 0.08, // увеличение на 8% каждые 8 секунд  
+  TRASH_INCREASE_RATE: 0.08, // увеличение на 8% каждые 6 секунд  
   MAX_TRASH_CHANCE: 0.45, // максимум 45% мусора
 };
 
