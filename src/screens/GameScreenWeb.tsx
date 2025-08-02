@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {GameState} from '../App';
 import { SKIN_CONFIGS } from '../constants/game';
 import { getFoodConfig, getTrashConfig } from '../utils/gameUtils';
-import { checkAchievements, calculateLevel, ACHIEVEMENTS } from '../constants/achievements';
+import { checkAchievements, calculateLevel } from '../constants/achievements';
 
 const Container = styled.div`
   width: 100vw;
@@ -264,12 +264,7 @@ interface ComboType {
   y: number;
 }
 
-interface AchievementType {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-}
+
 
 // FOOD_TYPES и TRASH_TYPES импортируются из constants/game.ts
 
@@ -295,6 +290,104 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
   
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
+
+  // Функции игры - объявляем до useEffect
+  const startGame = useCallback(() => {
+    setIsGameActive(true);
+    setScore(0);
+    setGameTime(60);
+    setLives(gameState.lives);
+    setCurrentCoins(gameState.coins);
+    setFoodItems([]);
+    setScorePopups([]);
+    
+    // Telegram haptic feedback
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+      window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    }
+  }, [gameState.lives, gameState.coins]);
+
+  const endGame = useCallback(() => {
+    setIsGameActive(false);
+    const newHighScore = Math.max(gameState.highScore, score);
+    const earnedCoins = Math.floor(score / 10);
+    
+    // Обновляем статистику игры
+    const newTotalGamesPlayed = gameState.totalGamesPlayed + 1;
+    const newTotalScore = gameState.totalScore + score;
+    
+    // Проверяем ачивки
+    const newAchievements = checkAchievements({
+      ...gameState,
+      totalGamesPlayed: newTotalGamesPlayed,
+      totalScore: newTotalScore,
+      highScore: newHighScore,
+      coins: currentCoins + earnedCoins,
+    });
+    
+    // Добавляем опыт за игру
+    const gameExperience = Math.floor(score / 5) + (combo >= 5 ? 20 : 0); // опыт за игру + бонус за комбо
+    const newExperience = gameState.experience + gameExperience;
+    const newLevel = calculateLevel(newExperience);
+    
+    // Показываем эффект повышения уровня
+    if (newLevel > gameState.level) {
+      setShowLevelUp(true);
+      setTimeout(() => setShowLevelUp(false), 3000);
+    }
+    
+    onUpdateGameState({
+      highScore: newHighScore,
+      coins: currentCoins + earnedCoins,
+      totalGamesPlayed: newTotalGamesPlayed,
+      totalScore: newTotalScore,
+      experience: newExperience,
+      level: newLevel,
+      achievements: [...gameState.achievements, ...newAchievements],
+    });
+
+    // Telegram haptic feedback
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+      window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    }
+  }, [gameState, score, currentCoins, combo, onUpdateGameState]);
+
+  const spawnFood = useCallback(() => {
+    if (!isGameActive) return;
+
+    // Простой спавн еды
+    const isSpawningTrash = Math.random() < 0.2; // 20% шанс мусора
+    
+    let newItem: FoodItemType;
+    
+    if (isSpawningTrash) {
+      // Спавним негативные блюда
+      const trashTypes = ['pasta', 'sushi', 'shawarma', 'burger'] as const;
+      const trashType = trashTypes[Math.floor(Math.random() * trashTypes.length)];
+      
+      newItem = {
+        id: Date.now().toString(),
+        type: trashType,
+        x: Math.random() * (window.innerWidth - 100),
+        y: -50,
+        isTrash: true,
+      };
+    } else {
+      // Спавним кавказскую еду
+      const availableFoods = gameState.unlockedFoods;
+      const randomFood = availableFoods[Math.floor(Math.random() * availableFoods.length)] as 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'lobio' | 'satsivi' | 'chakapuli';
+      
+      newItem = {
+        id: Date.now().toString(),
+        type: randomFood,
+        x: Math.random() * (window.innerWidth - 100),
+        y: -50,
+        isTrash: false,
+      };
+    }
+
+    setFoodItems((prev: FoodItemType[]) => [...prev, newItem]);
+  }, [isGameActive, gameState.unlockedFoods]);
 
   // Touch/Mouse handling - оптимизированная версия без задержки
   const handlePointerMove = useCallback((e: React.PointerEvent | React.MouseEvent) => {
@@ -352,7 +445,7 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
         clearInterval(foodSpawnerInterval);
       };
     }
-  }, [isGameActive]);
+  }, [isGameActive, endGame, spawnFood]);
 
   // Простая анимация падающей еды и частиц
   useEffect(() => {
@@ -390,66 +483,6 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     };
   }, [isGameActive]);
 
-  const startGame = () => {
-    setIsGameActive(true);
-    setScore(0);
-    setGameTime(60);
-    setLives(gameState.lives);
-    setCurrentCoins(gameState.coins);
-    setFoodItems([]);
-    setScorePopups([]);
-    
-    // Telegram haptic feedback
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-      window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-    }
-  };
-
-  const endGame = () => {
-    setIsGameActive(false);
-    const newHighScore = Math.max(gameState.highScore, score);
-    const earnedCoins = Math.floor(score / 10);
-    
-    // Обновляем статистику игры
-    const newTotalGamesPlayed = gameState.totalGamesPlayed + 1;
-    const newTotalScore = gameState.totalScore + score;
-    
-    // Проверяем ачивки
-    const newAchievements = checkAchievements({
-      ...gameState,
-      totalGamesPlayed: newTotalGamesPlayed,
-      totalScore: newTotalScore,
-      highScore: newHighScore,
-      coins: currentCoins + earnedCoins,
-    });
-    
-    // Добавляем опыт за игру
-    const gameExperience = Math.floor(score / 5) + (combo >= 5 ? 20 : 0); // опыт за игру + бонус за комбо
-    const newExperience = gameState.experience + gameExperience;
-    const newLevel = calculateLevel(newExperience);
-    
-    // Показываем эффект повышения уровня
-    if (newLevel > gameState.level) {
-      setShowLevelUp(true);
-      setTimeout(() => setShowLevelUp(false), 3000);
-    }
-    
-    onUpdateGameState({
-      highScore: newHighScore,
-      coins: currentCoins + earnedCoins,
-      totalGamesPlayed: newTotalGamesPlayed,
-      totalScore: newTotalScore,
-      experience: newExperience,
-      level: newLevel,
-      achievements: [...gameState.achievements, ...newAchievements],
-    });
-
-    // Telegram haptic feedback
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-      window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-    }
-  };
-
   const createParticles = (x: number, y: number, color: string) => {
     const newParticles: ParticleType[] = [];
     for (let i = 0; i < 8; i++) {
@@ -478,43 +511,6 @@ const GameScreenWeb: React.FC<GameScreenProps> = ({
     setTimeout(() => {
       setCombos(prev => prev.filter(c => c.id !== comboId));
     }, 2000);
-  };
-
-  const spawnFood = () => {
-    if (!isGameActive) return;
-
-    // Простой спавн еды
-    const isSpawningTrash = Math.random() < 0.2; // 20% шанс мусора
-    
-    let newItem: FoodItemType;
-    
-    if (isSpawningTrash) {
-      // Спавним негативные блюда
-      const trashTypes = ['pasta', 'sushi', 'shawarma', 'burger'] as const;
-      const trashType = trashTypes[Math.floor(Math.random() * trashTypes.length)];
-      
-      newItem = {
-        id: Date.now().toString(),
-        type: trashType,
-        x: Math.random() * (window.innerWidth - 100),
-        y: -50,
-        isTrash: true,
-      };
-    } else {
-      // Спавним кавказскую еду
-      const availableFoods = gameState.unlockedFoods;
-      const randomFood = availableFoods[Math.floor(Math.random() * availableFoods.length)] as 'hinkali' | 'harcho' | 'adjarski' | 'megruli' | 'lobio' | 'satsivi' | 'chakapuli';
-      
-      newItem = {
-        id: Date.now().toString(),
-        type: randomFood,
-        x: Math.random() * (window.innerWidth - 100),
-        y: -50,
-        isTrash: false,
-      };
-    }
-
-    setFoodItems((prev: FoodItemType[]) => [...prev, newItem]);
   };
 
   const collectFood = (foodItem: FoodItemType) => {

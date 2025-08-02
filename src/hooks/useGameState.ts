@@ -13,6 +13,11 @@ const defaultGameState: GameState = {
   soundEnabled: true,
   vibrationEnabled: true,
   lives: 3, // добавляем систему жизней
+  level: 1, // начальный уровень
+  experience: 0, // начальный опыт
+  achievements: [], // пустой список ачивок
+  totalGamesPlayed: 0, // 0 игр сыграно
+  totalScore: 0, // 0 общего счета
 };
 
 export const useGameState = () => {
